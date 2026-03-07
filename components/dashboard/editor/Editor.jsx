@@ -1,4 +1,6 @@
-import { useRouter, useParams } from 'next/navigation';
+"use client";
+import QRCode from 'qrcode';
+import { useRouter, useParams, usePathname } from 'next/navigation';
 
 import { toast } from 'sonner'
 import { usePinch } from '@use-gesture/react'
@@ -15,16 +17,16 @@ import UnsavedDialog from './components/UnsavedDialog'
 import EmailTemplateModal from '../shared/EmailTemplateModal'
 
 
-export default function Editor(){
+export default function Editor() {
   const navigate = useRouter()
-  const location = useLocation()
+  const pathname = usePathname()
   const { campaignId, templateId } = useParams()
-  
+
   // Determine editor mode based on URL or parameters
-  const isTemplateMode = location.pathname.includes('/templates/')
+  const isTemplateMode = pathname.includes('/templates/')
   const [campaignType, setCampaignType] = useState('generate_only')
   const isEmailSendEnabled = !isTemplateMode && campaignType === 'generate_send'
-  
+
   const canvasRef = useRef(null)
   const fabricRef = useRef(null) // Fabric Canvas instance
   const panningRef = useRef({ active: false, startX: 0, startY: 0, initialPanX: 0, initialPanY: 0 })
@@ -38,11 +40,11 @@ export default function Editor(){
   const [user, setUser] = useState(null)
   const [csvData, setCsvData] = useState([])
   const [csvColumns, setCsvColumns] = useState([])
-  
+
   // State for text fields (layers)
   // We sync this with Fabric objects
   const [textFields, setTextFields] = useState([])
-  
+
   const [selectedFieldId, setSelectedFieldId] = useState(null)
   const [campaignName, setCampaignName] = useState('')
   const [isFullscreen, setIsFullscreen] = useState(false)
@@ -50,7 +52,7 @@ export default function Editor(){
   const [rightSidebarOpen, setRightSidebarOpen] = useState(true)
   const [zoomLevel, setZoomLevel] = useState(1)
   const [canvasPan, setCanvasPan] = useState({ x: 0, y: 0 })
-  
+
   // Advanced Editor State
   const [history, setHistory] = useState([])
   const [historyStep, setHistoryStep] = useState(-1)
@@ -58,21 +60,21 @@ export default function Editor(){
   const [showGrid, setShowGrid] = useState(false)
   const [showShortcuts, setShowShortcuts] = useState(false)
   const [certificates, setCertificates] = useState([])
-  
+
   const [sendingEmails, setSendingEmails] = useState(false)
   const [emailsSent, setEmailsSent] = useState(0)
-  const [isLoading, setIsLoading] = useState(true)  
+  const [isLoading, setIsLoading] = useState(true)
   const [isSavingWork, setIsSavingWork] = useState(false)
   const [canvasReady, setCanvasReady] = useState(false)
-  
+
   const initialDataRef = useRef(null)
   const isModifying = useRef(false)
   const hasLoaded = useRef(false)
-  
+
   const [lastSavedTime, setLastSavedTime] = useState(null)
   const [dbTemplates, setDbTemplates] = useState([])
   const [isFetchingTemplates, setIsFetchingTemplates] = useState(false)
-  
+
   // Use useMemo for derived state to avoid extra re-renders (Vercel Best Practices)
   const hasUnsavedChanges = React.useMemo(() => {
     if (!initialDataRef.current || isLoading) return false
@@ -84,7 +86,7 @@ export default function Editor(){
     })
     return currentData !== initialDataRef.current
   }, [textFields, campaignName, csvData, csvColumns, isLoading, lastSavedTime])
-  
+
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false)
   const [isAutoSaving, setIsAutoSaving] = useState(false)
   const modificationTimeout = useRef(null)
@@ -112,22 +114,22 @@ export default function Editor(){
   const isHistoryAction = useRef(false)
   const lastHistoryState = useRef(null)
 
-   const addToHistory = useCallback((newState) => {
+  const addToHistory = useCallback((newState) => {
     // Clone state to prevent reference issues in history
     const stateStr = JSON.stringify(newState)
     if (stateStr === lastHistoryState.current) return
-    
+
     lastHistoryState.current = stateStr
-    
+
     // Prefer structuredClone if available for perf, fallback to JSON parse
-    const clonedState = typeof structuredClone === 'function' 
-      ? structuredClone(newState) 
+    const clonedState = typeof structuredClone === 'function'
+      ? structuredClone(newState)
       : JSON.parse(stateStr)
-      
+
     const newHistory = history.slice(0, historyStep + 1)
     newHistory.push(clonedState)
     if (newHistory.length > 50) newHistory.shift()
-    
+
     setHistory(newHistory)
     setHistoryStep(newHistory.length - 1)
   }, [history, historyStep])
@@ -188,19 +190,19 @@ export default function Editor(){
   const addShape = useCallback((type, customWidth, customHeight) => {
     const id = uuidv4()
     let shape = {
-        id,
-        type,
-        x: uploadedImage ? Math.round(uploadedImage.width / 2) - (customWidth ? customWidth / 2 : 50) : 100,
-        y: uploadedImage ? Math.round(uploadedImage.height / 2) - (customHeight ? customHeight / 2 : 50) : 100,
-        width: customWidth || 100,
-        height: customHeight || 100,
-        color: '#A098FF',
-        opacity: 1,
-        locked: false
+      id,
+      type,
+      x: uploadedImage ? Math.round(uploadedImage.width / 2) - (customWidth ? customWidth / 2 : 50) : 100,
+      y: uploadedImage ? Math.round(uploadedImage.height / 2) - (customHeight ? customHeight / 2 : 50) : 100,
+      width: customWidth || 100,
+      height: customHeight || 100,
+      color: '#A098FF',
+      opacity: 1,
+      locked: false
     }
-    
+
     if (type === 'circle') shape.radius = 50
-    
+
     setTextFields(prev => {
       const newFields = [...prev, shape]
       addToHistory(newFields)
@@ -214,7 +216,7 @@ export default function Editor(){
       setUser(session?.user ?? null)
     })
   }, [])
-  
+
   // Track initial data for unsaved changes comparison
   useEffect(() => {
     if (!initialDataRef.current && !isLoading && (campaignId || isTemplateMode)) {
@@ -226,7 +228,7 @@ export default function Editor(){
       })
     }
   }, [textFields, campaignName, csvData, csvColumns, isLoading, campaignId, isTemplateMode])
-  
+
   // Warn before leaving page with unsaved changes
   useEffect(() => {
     const handleBeforeUnload = (e) => {
@@ -236,29 +238,29 @@ export default function Editor(){
         return ''
       }
     }
-    
+
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [hasUnsavedChanges])
-  
+
   // Fetch library templates
   useEffect(() => {
     const fetchTemplates = async () => {
       try {
         setIsFetchingTemplates(true)
         const { data: { user } } = await supabase.auth.getUser()
-        
+
         const [pubTemplates, privTemplates] = await Promise.all([
           templateService.getPublicTemplates(),
           user ? templateService.getUserTemplates(user.id) : Promise.resolve([])
         ])
-        
+
         // Combine them with source markers
         const allTemplates = [
           ...pubTemplates.map(t => ({ ...t, source: 'public' })),
           ...privTemplates.map(t => ({ ...t, source: 'private' }))
         ]
-        
+
         setDbTemplates(allTemplates)
       } catch (error) {
         console.error('Error fetching library templates:', error)
@@ -266,7 +268,7 @@ export default function Editor(){
         setIsFetchingTemplates(false)
       }
     }
-    
+
     fetchTemplates()
   }, [])
 
@@ -291,9 +293,9 @@ export default function Editor(){
   useEffect(() => {
     const loadCampaign = async () => {
       if (hasLoaded.current) return
-      
+
       const minLoadTime = new Promise(resolve => setTimeout(resolve, 3000))
-      
+
       // CASE 1: Editing an existing template
       if (templateId) {
         setIsLoading(true)
@@ -302,10 +304,10 @@ export default function Editor(){
             templateService.getPrivateTemplate(templateId),
             minLoadTime
           ])
-          
+
           if (data) {
             setCampaignName(data.name)
-            
+
             if (data.template_data && data.template_data.textFields) {
               const fields = data.template_data.textFields
               const refreshedFields = await refreshImageFields(fields)
@@ -341,7 +343,7 @@ export default function Editor(){
         setIsLoading(true)
         await minLoadTime
         setCampaignName('Untitled Template')
-        
+
         // Default blank canvas
         const canvas = document.createElement('canvas')
         canvas.width = 800
@@ -351,7 +353,7 @@ export default function Editor(){
         ctx.fillRect(0, 0, canvas.width, canvas.height)
         const bgImg = await loadImage(canvas.toDataURL('image/png'))
         setUploadedImage(bgImg)
-        
+
         setIsLoading(false)
         hasLoaded.current = true
         return
@@ -376,39 +378,39 @@ export default function Editor(){
 
           if (error) throw error
           if (certError) console.error('Error loading certs:', certError)
-          
+
           if (certs) setCertificates(certs)
-          
+
           if (data) {
             setCampaignName(data.name)
             setCampaignType(data.type)
-            
+
             if (data.csv_data) {
-                const { headers, data: csvRows } = data.csv_data
-                setCsvColumns(headers)
-                setCsvData(csvRows)
-                const names = csvRows.map(row => row[headers[0]] || '')
-                setNames(names)
-                if (names.length > 0) {
-                    setPreviewName(names[0])
-                    setPreviewRowIndex(0)
-                }
+              const { headers, data: csvRows } = data.csv_data
+              setCsvColumns(headers)
+              setCsvData(csvRows)
+              const names = csvRows.map(row => row[headers[0]] || '')
+              setNames(names)
+              if (names.length > 0) {
+                setPreviewName(names[0])
+                setPreviewRowIndex(0)
+              }
             }
-            
+
             if (data.canvas_config && data.canvas_config.textFields) {
-                const fields = data.canvas_config.textFields
-                const fieldsWithIds = fields.map((f, idx) => ({
-                    ...f,
-                    id: f.id || `restored_${Date.now()}_${idx}`
-                }))
-                const refreshedFields = await refreshImageFields(fieldsWithIds)
-                setTextFields(refreshedFields)
-                setHistory([JSON.parse(JSON.stringify(refreshedFields))])
-                setHistoryStep(0)
-                lastHistoryState.current = JSON.stringify(refreshedFields)
-                needsInitialSync.current = true
+              const fields = data.canvas_config.textFields
+              const fieldsWithIds = fields.map((f, idx) => ({
+                ...f,
+                id: f.id || `restored_${Date.now()}_${idx}`
+              }))
+              const refreshedFields = await refreshImageFields(fieldsWithIds)
+              setTextFields(refreshedFields)
+              setHistory([JSON.parse(JSON.stringify(refreshedFields))])
+              setHistoryStep(0)
+              lastHistoryState.current = JSON.stringify(refreshedFields)
+              needsInitialSync.current = true
             }
-            
+
             if (data.public_template_id || data.private_template_id) {
               const tId = data.public_template_id || data.private_template_id
               const template = data.public_templates || data.private_templates || templates.find(t => String(t.id) === String(tId))
@@ -424,7 +426,7 @@ export default function Editor(){
                   ctx.fillRect(0, 0, canvas.width, canvas.height)
                   const bgImg = await loadImage(canvas.toDataURL('image/png'))
                   setUploadedImage(bgImg)
-                  
+
                   if (!data.canvas_config || !data.canvas_config.textFields) {
                     const newFields = template.template_data.textFields.map(f => ({
                       ...f,
@@ -440,13 +442,13 @@ export default function Editor(){
                   const { img: bgImg, detectedFields } = await generateTemplateBackground(template)
                   setUploadedImage(bgImg)
                   if (!data.canvas_config || !data.canvas_config.textFields) {
-                      if (detectedFields.length > 0) {
-                          const newFields = detectedFields.map(f => ({ ...f, id: `auto_${Date.now()}_${Math.random()}` }))
-                          setTextFields(newFields)
-                          setHistory([JSON.parse(JSON.stringify(newFields))])
-                          setHistoryStep(0)
-                          lastHistoryState.current = JSON.stringify(newFields)
-                      }
+                    if (detectedFields.length > 0) {
+                      const newFields = detectedFields.map(f => ({ ...f, id: `auto_${Date.now()}_${Math.random()}` }))
+                      setTextFields(newFields)
+                      setHistory([JSON.parse(JSON.stringify(newFields))])
+                      setHistoryStep(0)
+                      lastHistoryState.current = JSON.stringify(newFields)
+                    }
                   }
                 }
               }
@@ -488,8 +490,8 @@ export default function Editor(){
 
   const handleSaveWork = useCallback(async (isAutoSave = false) => {
     if (!campaignId && !isTemplateMode) {
-        if (!isAutoSave) toast.error('No project to save')
-        return
+      if (!isAutoSave) toast.error('No project to save')
+      return
     }
 
     if (isAutoSave) {
@@ -497,67 +499,67 @@ export default function Editor(){
     } else {
       setIsSavingWork(true)
     }
-    
-    try {
-        const sanitizedFields = textFields.map(f => {
-            if (f.type === 'image') {
-                const { src, image, ...rest } = f
-                return rest
-            }
-            return f
-        })
 
-        if (isTemplateMode) {
-          const html = mapJsonToHtml(sanitizedFields)
-          
-          if (templateId) {
-            await templateService.updateTemplate(templateId, {
-              name: campaignName,
-              template_data: { 
-                textFields: sanitizedFields,
-                html_content: html // Store snapshot in JSON
-              }
-            })
-          } else {
-            const newTemplate = await templateService.createTemplate({
-              user_id: user.id,
-              name: campaignName || 'Untitled Template',
-              template_data: { 
-                textFields: sanitizedFields,
-                html_content: html 
-              },
-              category: 'custom'
-            })
-            // Update URL to the new template ID
-            navigate.push(`/dashboard/templates/edit/${newTemplate.id}`, { replace: true })
-            toast.success('Template created successfully')
-          }
-        } else {
-          await campaignService.updateCampaign(campaignId, {
-              canvas_config: {
-                  textFields: sanitizedFields
-              },
-              csv_data: {
-                  headers: csvColumns,
-                  data: csvData
-              }
-          })
+    try {
+      const sanitizedFields = textFields.map(f => {
+        if (f.type === 'image') {
+          const { src, image, ...rest } = f
+          return rest
         }
-        
-        initialDataRef.current = JSON.stringify({
-          textFields,
-          campaignName,
-          csvData,
-          csvColumns
+        return f
+      })
+
+      if (isTemplateMode) {
+        const html = mapJsonToHtml(sanitizedFields)
+
+        if (templateId) {
+          await templateService.updateTemplate(templateId, {
+            name: campaignName,
+            template_data: {
+              textFields: sanitizedFields,
+              html_content: html // Store snapshot in JSON
+            }
+          })
+        } else {
+          const newTemplate = await templateService.createTemplate({
+            user_id: user.id,
+            name: campaignName || 'Untitled Template',
+            template_data: {
+              textFields: sanitizedFields,
+              html_content: html
+            },
+            category: 'custom'
+          })
+          // Update URL to the new template ID
+          navigate.push(`/dashboard/templates/edit/${newTemplate.id}`, { replace: true })
+          toast.success('Template created successfully')
+        }
+      } else {
+        await campaignService.updateCampaign(campaignId, {
+          canvas_config: {
+            textFields: sanitizedFields
+          },
+          csv_data: {
+            headers: csvColumns,
+            data: csvData
+          }
         })
-        setLastSavedTime(new Date())
-        if (!isAutoSave && (templateId || campaignId)) toast.success('Work saved successfully')
+      }
+
+      initialDataRef.current = JSON.stringify({
+        textFields,
+        campaignName,
+        csvData,
+        csvColumns
+      })
+      setLastSavedTime(new Date())
+      if (!isAutoSave && (templateId || campaignId)) toast.success('Work saved successfully')
     } catch (error) {
-        console.error('Error saving work:', error)
-        if (!isAutoSave) toast.error('Failed to save work')
+      console.error('Error saving work:', error)
+      if (!isAutoSave) toast.error('Failed to save work')
     } finally {
-        setIsAutoSaving(false)
-        setIsSavingWork(false)
+      setIsAutoSaving(false)
+      setIsSavingWork(false)
     }
   }, [campaignId, templateId, isTemplateMode, textFields, csvColumns, csvData, campaignName, user, navigate])
 
@@ -569,11 +571,11 @@ export default function Editor(){
     } else {
       // Normal scroll translates to pan when space is held or just pass through
       if (isSpacePressed) {
-          e.preventDefault()
-          setCanvasPan(prev => ({
-            x: prev.x - e.deltaX,
-            y: prev.y - e.deltaY
-          }))
+        e.preventDefault()
+        setCanvasPan(prev => ({
+          x: prev.x - e.deltaX,
+          y: prev.y - e.deltaY
+        }))
       }
     }
   }, [isSpacePressed])
@@ -597,35 +599,35 @@ export default function Editor(){
       const isMiddleClick = e.button === 1
       const isRightClick = e.button === 2
       const isWorkspaceTarget = e.target === workspace || e.target.id === 'editor-workspace'
-      
+
       const shouldPan = isWorkspaceTarget || isSpacePressed || isMiddleClick || isRightClick
 
       if (shouldPan) {
-          if (isRightClick || isMiddleClick || isSpacePressed) {
-            e.stopPropagation()
-          }
+        if (isRightClick || isMiddleClick || isSpacePressed) {
+          e.stopPropagation()
+        }
 
-          setIsUiPanning(true)
-          panningRef.current.active = true
-          panningRef.current.startX = e.clientX
-          panningRef.current.startY = e.clientY
-          panningRef.current.initialPanX = canvasPanRef.current.x
-          panningRef.current.initialPanY = canvasPanRef.current.y
-          
-          window.addEventListener('pointermove', handleWorkspacePointerMove)
-          window.addEventListener('pointerup', handleWorkspacePointerUp)
-          
-          if (fabricRef.current && (isSpacePressed || isMiddleClick || isRightClick)) {
-            fabricRef.current.discardActiveObject()
-            fabricRef.current.requestRenderAll()
-          }
+        setIsUiPanning(true)
+        panningRef.current.active = true
+        panningRef.current.startX = e.clientX
+        panningRef.current.startY = e.clientY
+        panningRef.current.initialPanX = canvasPanRef.current.x
+        panningRef.current.initialPanY = canvasPanRef.current.y
+
+        window.addEventListener('pointermove', handleWorkspacePointerMove)
+        window.addEventListener('pointerup', handleWorkspacePointerUp)
+
+        if (fabricRef.current && (isSpacePressed || isMiddleClick || isRightClick)) {
+          fabricRef.current.discardActiveObject()
+          fabricRef.current.requestRenderAll()
+        }
       }
     }
 
     workspace.addEventListener('pointerdown', handleNativePointerDown, { capture: true })
     document.addEventListener('gesturestart', preventSafariZoom)
     document.addEventListener('gesturechange', preventSafariZoom)
-    
+
     return () => {
       workspace.removeEventListener('pointerdown', handleNativePointerDown, { capture: true })
       document.removeEventListener('gesturestart', preventSafariZoom)
@@ -677,19 +679,19 @@ export default function Editor(){
       lastHistoryState.current = JSON.stringify(nextState)
     }
   }, [history, historyStep])
-  
+
   // Snapshot history on textFields changes
   useEffect(() => {
-     if (isHistoryAction.current) {
-       isHistoryAction.current = false
-       return
-     }
-     
-     const timer = setTimeout(() => {
-       addToHistory(textFields)
-     }, 300) // Debounce snapshots
-     
-     return () => clearTimeout(timer)
+    if (isHistoryAction.current) {
+      isHistoryAction.current = false
+      return
+    }
+
+    const timer = setTimeout(() => {
+      addToHistory(textFields)
+    }, 300) // Debounce snapshots
+
+    return () => clearTimeout(timer)
   }, [textFields, addToHistory])
 
   // Record history on change (debounced manually or via specific actions)
@@ -698,27 +700,27 @@ export default function Editor(){
 
 
   const duplicateLayer = useCallback((id) => {
-      setTextFields(prev => {
-          const field = prev.find(f => f.id === id)
-          if(!field) return prev
+    setTextFields(prev => {
+      const field = prev.find(f => f.id === id)
+      if (!field) return prev
 
-          // Prevent duplicating unique fields
-          if (field.type === 'uuid' || field.type === 'qrcode') {
-              toast.error(`Only one ${field.type.toUpperCase()} allowed per certificate`)
-              return prev
-          }
-          
-          const newField = {
-              ...field,
-              id: Date.now(),
-              x: field.x + 20,
-              y: field.y + 20
-          }
-          const newFields = [...prev, newField]
-          addToHistory(newFields)
-          setSelectedFieldId(newField.id)
-          return newFields
-      })
+      // Prevent duplicating unique fields
+      if (field.type === 'uuid' || field.type === 'qrcode') {
+        toast.error(`Only one ${field.type.toUpperCase()} allowed per certificate`)
+        return prev
+      }
+
+      const newField = {
+        ...field,
+        id: Date.now(),
+        x: field.x + 20,
+        y: field.y + 20
+      }
+      const newFields = [...prev, newField]
+      addToHistory(newFields)
+      setSelectedFieldId(newField.id)
+      return newFields
+    })
   }, [addToHistory])
 
   // Initialize Fabric Data Sync
@@ -742,7 +744,7 @@ export default function Editor(){
     fabricRef.current = canvas
     setCanvasReady(true)
     console.log('✅ Canvas is ready')
-    
+
     // Force initial sync if fields were loaded before canvas is ready
     if (needsInitialSync.current) {
       console.log('🔄 [FORCE-SYNC] Triggering initial sync after canvas ready')
@@ -757,14 +759,14 @@ export default function Editor(){
 
     // Set background with reserved ID
     const bg = new FabricImage(uploadedImage, {
-       id: 'canvas-background',
-       originX: 'left',
-       originY: 'top',
-       selectable: false,
-       evented: false,
-       scaleX: 1,
-       scaleY: 1,
-       opacity: 1
+      id: 'canvas-background',
+      originX: 'left',
+      originY: 'top',
+      selectable: false,
+      evented: false,
+      scaleX: 1,
+      scaleY: 1,
+      opacity: 1
     })
     canvas.add(bg)
     canvas.sendObjectToBack(bg)
@@ -775,183 +777,183 @@ export default function Editor(){
 
     // Event listeners
     canvas.on('selection:created', (e) => {
-       const active = e.selected?.[0]
-       if(active?.id) setSelectedFieldId(active.id)
+      const active = e.selected?.[0]
+      if (active?.id) setSelectedFieldId(active.id)
     })
     canvas.on('selection:updated', (e) => {
-       const active = e.selected?.[0]
-       if(active?.id) setSelectedFieldId(active.id)
+      const active = e.selected?.[0]
+      if (active?.id) setSelectedFieldId(active.id)
     })
     canvas.on('selection:cleared', () => setSelectedFieldId(null))
 
     canvas.on('object:moving', (e) => {
-       isModifying.current = true
-       if (modificationTimeout.current) clearTimeout(modificationTimeout.current)
-       
-       const obj = e.target
-       if (!obj || !uploadedImage) return
+      isModifying.current = true
+      if (modificationTimeout.current) clearTimeout(modificationTimeout.current)
 
-       const canvasWidth = uploadedImage.width
-       const canvasHeight = uploadedImage.height
-       const centerX = canvasWidth / 2
-       const centerY = canvasHeight / 2
-       const snapDist = 10
+      const obj = e.target
+      if (!obj || !uploadedImage) return
 
-       // Clear existing guidelines
-       const guides = canvas.getObjects().filter(o => o.id === 'guide-line')
-       guides.forEach(g => canvas.remove(g))
+      const canvasWidth = uploadedImage.width
+      const canvasHeight = uploadedImage.height
+      const centerX = canvasWidth / 2
+      const centerY = canvasHeight / 2
+      const snapDist = 10
 
-       const objCenter = obj.getCenterPoint()
-       let snappedX = false
-       let snappedY = false
+      // Clear existing guidelines
+      const guides = canvas.getObjects().filter(o => o.id === 'guide-line')
+      guides.forEach(g => canvas.remove(g))
 
-       // Snap to Center X
-       if (Math.abs(objCenter.x - centerX) < snapDist) {
-           obj.setPositionByOrigin(new Point(centerX, objCenter.y), 'center', 'center')
-           snappedX = true
-           
-           // Draw Vertical Guide
-           const vLine = new Line([centerX, 0, centerX, canvasHeight], {
-               id: 'guide-line',
-               stroke: '#00FFFF', // Cyan for visibility
-               strokeWidth: 1,
-               selectable: false,
-               evented: false,
-               strokeDashArray: [5, 5],
-               opacity: 0.8
-           })
-           canvas.add(vLine)
-       }
+      const objCenter = obj.getCenterPoint()
+      let snappedX = false
+      let snappedY = false
 
-       // Snap to Center Y
-       if (Math.abs(objCenter.y - centerY) < snapDist) {
-           obj.setPositionByOrigin(new Point(objCenter.x, centerY), 'center', 'center')
-           snappedY = true
+      // Snap to Center X
+      if (Math.abs(objCenter.x - centerX) < snapDist) {
+        obj.setPositionByOrigin(new Point(centerX, objCenter.y), 'center', 'center')
+        snappedX = true
 
-           // Draw Horizontal Guide
-           const hLine = new Line([0, centerY, canvasWidth, centerY], {
-               id: 'guide-line',
-               stroke: '#00FFFF',
-               strokeWidth: 1,
-               selectable: false,
-               evented: false,
-               strokeDashArray: [5, 5],
-               opacity: 0.8
-           })
-           canvas.add(hLine)
-       }
+        // Draw Vertical Guide
+        const vLine = new Line([centerX, 0, centerX, canvasHeight], {
+          id: 'guide-line',
+          stroke: '#00FFFF', // Cyan for visibility
+          strokeWidth: 1,
+          selectable: false,
+          evented: false,
+          strokeDashArray: [5, 5],
+          opacity: 0.8
+        })
+        canvas.add(vLine)
+      }
 
-       if (snappedX || snappedY) {
-           canvas.requestRenderAll()
-       }
+      // Snap to Center Y
+      if (Math.abs(objCenter.y - centerY) < snapDist) {
+        obj.setPositionByOrigin(new Point(objCenter.x, centerY), 'center', 'center')
+        snappedY = true
+
+        // Draw Horizontal Guide
+        const hLine = new Line([0, centerY, canvasWidth, centerY], {
+          id: 'guide-line',
+          stroke: '#00FFFF',
+          strokeWidth: 1,
+          selectable: false,
+          evented: false,
+          strokeDashArray: [5, 5],
+          opacity: 0.8
+        })
+        canvas.add(hLine)
+      }
+
+      if (snappedX || snappedY) {
+        canvas.requestRenderAll()
+      }
     })
 
     canvas.on('object:scaling', () => {
-       isModifying.current = true
-       if (modificationTimeout.current) clearTimeout(modificationTimeout.current)
+      isModifying.current = true
+      if (modificationTimeout.current) clearTimeout(modificationTimeout.current)
     })
 
     canvas.on('object:rotating', () => {
-       isModifying.current = true
-       if (modificationTimeout.current) clearTimeout(modificationTimeout.current)
+      isModifying.current = true
+      if (modificationTimeout.current) clearTimeout(modificationTimeout.current)
     })
 
     canvas.on('object:modified', (e) => {
-       // Clear guidelines
-       const guides = canvas.getObjects().filter(o => o.id === 'guide-line')
-       guides.forEach(g => canvas.remove(g))
-       canvas.requestRenderAll()
+      // Clear guidelines
+      const guides = canvas.getObjects().filter(o => o.id === 'guide-line')
+      guides.forEach(g => canvas.remove(g))
+      canvas.requestRenderAll()
 
-       const target = e.target
-       if(!target) return
-       
-       // Lock sync for 500ms to prevent coordinate conflicts
-       isModifying.current = true
-       if (modificationTimeout.current) clearTimeout(modificationTimeout.current)
-       
-       // Update React state with final positions
-       const modifiedObjects = target.type === 'activeSelection' ? target.getObjects() : [target]
-       
-       setTextFields(prev => prev.map(f => {
-          const matchingObj = modifiedObjects.find(obj => String(obj.id) === String(f.id))
-          if (matchingObj) {
-            const obj = matchingObj
-            const isText = obj.type === 'i-text' || obj.type === 'text'
-            
-            // Use direct object properties (Fabric handles group coordinate conversion)
-            const newX = obj.left
-            const newY = obj.top
-            const newScaleX = obj.scaleX
-            const newScaleY = obj.scaleY
-            const newAngle = obj.angle || 0
-            
-            // Normalize Font Size for text objects
-            let newFontSize = f.fontSize
-            let finalScaleX = newScaleX
-            let finalScaleY = newScaleY
-             let newWidth = (obj.width || 0) * newScaleX
-             let newHeight = (obj.height || 0) * newScaleY
-             let newRadius = f.radius
+      const target = e.target
+      if (!target) return
 
-             if (isText) {
-                 // Absorb scale into font size for text
-                 newFontSize = Math.round((obj.fontSize || f.fontSize) * newScaleX)
-                 finalScaleX = 1
-                 finalScaleY = 1
-                 // Reset the object scale on canvas immediately
-                 obj.set({ fontSize: newFontSize, scaleX: 1, scaleY: 1 })
-                 obj.setCoords()
-             } else if (['rect', 'triangle', 'circle'].includes(obj.type)) {
-                 // Shape normalization: Absorb scale into dimensions
-                 finalScaleX = 1
-                 finalScaleY = 1
-                 if (obj.type === 'circle') {
-                    newRadius = Math.round((obj.radius || 50) * newScaleX)
-                    newWidth = newRadius * 2
-                    newHeight = newRadius * 2
-                    obj.set({ radius: newRadius, scaleX: 1, scaleY: 1 })
-                 } else {
-                    newWidth = Math.round((obj.width || 0) * newScaleX)
-                    newHeight = Math.round((obj.height || 0) * newScaleY)
-                    obj.set({ width: newWidth, height: newHeight, scaleX: 1, scaleY: 1 })
-                 }
-                 obj.setCoords()
-             }
+      // Lock sync for 500ms to prevent coordinate conflicts
+      isModifying.current = true
+      if (modificationTimeout.current) clearTimeout(modificationTimeout.current)
 
-             return {
-               ...f,
-               x: newX,
-               y: newY,
-               fontSize: newFontSize,
-               scaleX: finalScaleX,
-               scaleY: finalScaleY,
-               rotation: newAngle,
-               width: newWidth,
-               height: newHeight,
-               size: f.type === 'qrcode' ? newWidth : f.size,
-               radius: newRadius,
-               color: obj.fill,
-               opacity: obj.opacity,
-               charSpacing: obj.charSpacing,
-               lineHeight: obj.lineHeight
-             }
-           }
-           return f
-         }))
-        
-        // Release lock after a delay
-        modificationTimeout.current = setTimeout(() => {
-          isModifying.current = false
-          canvas.requestRenderAll()
-        }, 200)
-        
-        // Add to history
-        setTimeout(() => {
-           setTextFields(current => {
-             addToHistory(current)
-             return current
-           })
-        }, 600)
+      // Update React state with final positions
+      const modifiedObjects = target.type === 'activeSelection' ? target.getObjects() : [target]
+
+      setTextFields(prev => prev.map(f => {
+        const matchingObj = modifiedObjects.find(obj => String(obj.id) === String(f.id))
+        if (matchingObj) {
+          const obj = matchingObj
+          const isText = obj.type === 'i-text' || obj.type === 'text'
+
+          // Use direct object properties (Fabric handles group coordinate conversion)
+          const newX = obj.left
+          const newY = obj.top
+          const newScaleX = obj.scaleX
+          const newScaleY = obj.scaleY
+          const newAngle = obj.angle || 0
+
+          // Normalize Font Size for text objects
+          let newFontSize = f.fontSize
+          let finalScaleX = newScaleX
+          let finalScaleY = newScaleY
+          let newWidth = (obj.width || 0) * newScaleX
+          let newHeight = (obj.height || 0) * newScaleY
+          let newRadius = f.radius
+
+          if (isText) {
+            // Absorb scale into font size for text
+            newFontSize = Math.round((obj.fontSize || f.fontSize) * newScaleX)
+            finalScaleX = 1
+            finalScaleY = 1
+            // Reset the object scale on canvas immediately
+            obj.set({ fontSize: newFontSize, scaleX: 1, scaleY: 1 })
+            obj.setCoords()
+          } else if (['rect', 'triangle', 'circle'].includes(obj.type)) {
+            // Shape normalization: Absorb scale into dimensions
+            finalScaleX = 1
+            finalScaleY = 1
+            if (obj.type === 'circle') {
+              newRadius = Math.round((obj.radius || 50) * newScaleX)
+              newWidth = newRadius * 2
+              newHeight = newRadius * 2
+              obj.set({ radius: newRadius, scaleX: 1, scaleY: 1 })
+            } else {
+              newWidth = Math.round((obj.width || 0) * newScaleX)
+              newHeight = Math.round((obj.height || 0) * newScaleY)
+              obj.set({ width: newWidth, height: newHeight, scaleX: 1, scaleY: 1 })
+            }
+            obj.setCoords()
+          }
+
+          return {
+            ...f,
+            x: newX,
+            y: newY,
+            fontSize: newFontSize,
+            scaleX: finalScaleX,
+            scaleY: finalScaleY,
+            rotation: newAngle,
+            width: newWidth,
+            height: newHeight,
+            size: f.type === 'qrcode' ? newWidth : f.size,
+            radius: newRadius,
+            color: obj.fill,
+            opacity: obj.opacity,
+            charSpacing: obj.charSpacing,
+            lineHeight: obj.lineHeight
+          }
+        }
+        return f
+      }))
+
+      // Release lock after a delay
+      modificationTimeout.current = setTimeout(() => {
+        isModifying.current = false
+        canvas.requestRenderAll()
+      }, 200)
+
+      // Add to history
+      setTimeout(() => {
+        setTextFields(current => {
+          addToHistory(current)
+          return current
+        })
+      }, 600)
     })
 
     // Immediate sync pass after initialization
@@ -985,12 +987,12 @@ export default function Editor(){
 
       // Calculate new zoom level with constraints
       const newZoom = Math.min(3, Math.max(0.25, scale))
-      
+
       // Cancel any pending zoom update
       if (zoomRafRef.current) {
         cancelAnimationFrame(zoomRafRef.current)
       }
-      
+
       // Batch zoom updates using requestAnimationFrame for smooth rendering
       zoomRafRef.current = requestAnimationFrame(() => {
         setZoomLevel(newZoom)
@@ -1063,7 +1065,7 @@ export default function Editor(){
     const canvas = fabricRef.current
     if (!canvas || !canvasReady) return
     console.log('🔄 [SYNC] State -> Fabric:', textFields.length, 'fields')
-    
+
     // NOTE: We do NOT skip sync here based on isModifying. 
     // We allow the loop to run so that text/content updates (which are not geometry) 
     // can happen even if a geometry lock is active (e.g. stale lock on load).
@@ -1071,7 +1073,7 @@ export default function Editor(){
 
     // Debounce sync to prevent UI lag on rapid updates
     if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current)
-    
+
     syncTimeoutRef.current = setTimeout(async () => {
       const canvasObjectsMap = new Map(canvas.getObjects().map(o => [String(o.id), o]))
       let needsRender = false
@@ -1081,7 +1083,7 @@ export default function Editor(){
         const field = textFields[idx]
         let obj = canvasObjectsMap.get(String(field.id))
         const originX = field.textAlign === 'center' ? 'center' : (field.textAlign === 'right' ? 'right' : 'left')
-        
+
         if (!obj) {
           needsRender = true
           // CREATE NEW OBJECTS
@@ -1140,10 +1142,10 @@ export default function Editor(){
               const rowIdx = (previewRowIndex >= 0 && previewRowIndex < csvData.length) ? previewRowIndex : 0
               const row = csvData[rowIdx]
               if (row) {
-                  const email = row?.Email || row?.email || ''
-                  const name = row?.[csvColumns[0]] || ''
-                  const cert = certificates.find(c => (email && c.recipient_email === email) || (name && c.recipient_name === name))
-                  textVal = cert ? cert.certificate_uuid.split('-')[0].toUpperCase() : 'ID: XXXXXXXX'
+                const email = row?.Email || row?.email || ''
+                const name = row?.[csvColumns[0]] || ''
+                const cert = certificates.find(c => (email && c.recipient_email === email) || (name && c.recipient_name === name))
+                textVal = cert ? cert.certificate_uuid.split('-')[0].toUpperCase() : 'ID: XXXXXXXX'
               } else { textVal = 'ID: XXXXXXXX' }
             } else {
               const rowIdx = (previewRowIndex >= 0 && previewRowIndex < csvData.length) ? previewRowIndex : 0
@@ -1172,68 +1174,68 @@ export default function Editor(){
           // UPDATE EXISTING
           const isSelfModifying = isModifying.current && selectedFieldId === field.id
           if (!isSelfModifying) {
-             if (Math.abs(obj.left - field.x) > 0.5) { obj.set('left', field.x); needsRender = true }
-             if (Math.abs(obj.top - field.y) > 0.5) { obj.set('top', field.y); needsRender = true }
-             
-             if (field.type === 'image' || field.type === 'qrcode') {
-                const targetW = field.size || field.width || 100
-                const targetH = field.size || field.height || 100
-                if (Math.abs(obj.width * obj.scaleX - targetW) > 1) {
-                  obj.set({ scaleX: targetW / obj.width, scaleY: targetH / obj.height })
-                  needsRender = true
-                }
-             } else if (['rect', 'circle', 'triangle'].includes(field.type)) {
-                if (field.type === 'rect' || field.type === 'triangle') {
-                   if (Math.abs(obj.width - (field.width || 100)) > 1) { obj.set('width', field.width || 100); needsRender = true }
-                   if (Math.abs(obj.height - (field.height || 100)) > 1) { obj.set('height', field.height || 100); needsRender = true }
-                } else if (field.type === 'circle') {
-                   if (Math.abs(obj.radius - (field.radius || 50)) > 1) { obj.set('radius', field.radius || 50); needsRender = true }
-                }
-             }
-             if (obj.fill !== field.color) { obj.set('fill', field.color); needsRender = true }
-             if (obj.opacity !== (field.opacity ?? 1)) { obj.set('opacity', field.opacity ?? 1); needsRender = true }
-          }
-          
-          if (obj instanceof IText || obj.type === 'i-text' || obj.type === 'IText') {
-             let textVal = ''
-             if (field.type === 'staticText') {
-               textVal = field.text || ''
-               if (textVal === '{Date}') {
-                 textVal = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-               }
-             } else if (field.type === 'uuid') {
-               const rowIdx = (previewRowIndex >= 0 && previewRowIndex < csvData.length) ? previewRowIndex : 0
-               const row = csvData[rowIdx]
-               if (row) {
-                   const email = row?.Email || row?.email || ''
-                   const name = row?.[csvColumns[0]] || ''
-                   const cert = certificates.find(c => (email && c.recipient_email === email) || (name && c.recipient_name === name))
-                   textVal = cert ? cert.certificate_uuid.split('-')[0].toUpperCase() : 'ID: XXXXXXXX'
-               } else { textVal = 'ID: XXXXXXXX' }
-             } else {
-               const rowIdx = (previewRowIndex >= 0 && previewRowIndex < csvData.length) ? previewRowIndex : 0
-               const row = csvData[rowIdx]
-               textVal = (row && field.column) ? formatFieldValue(row[field.column]) : `{${field.column}}`
-             }
+            if (Math.abs(obj.left - field.x) > 0.5) { obj.set('left', field.x); needsRender = true }
+            if (Math.abs(obj.top - field.y) > 0.5) { obj.set('top', field.y); needsRender = true }
 
-             if (obj.text !== textVal) { obj.set('text', textVal); needsRender = true }
-             if (obj.fontSize !== field.fontSize) { obj.set('fontSize', field.fontSize); needsRender = true }
-             if (obj.fill !== field.color) { obj.set('fill', field.color); needsRender = true }
-             if (obj.fontFamily !== field.fontFamily) { obj.set('fontFamily', field.fontFamily); needsRender = true }
-             const weight = field.bold ? 'bold' : 'normal'
-             if (obj.fontWeight !== weight) { obj.set('fontWeight', weight); needsRender = true }
-             if (obj.textAlign !== field.textAlign) { obj.set('textAlign', field.textAlign); needsRender = true }
-             if (obj.originX !== originX) { obj.set('originX', originX); needsRender = true }
+            if (field.type === 'image' || field.type === 'qrcode') {
+              const targetW = field.size || field.width || 100
+              const targetH = field.size || field.height || 100
+              if (Math.abs(obj.width * obj.scaleX - targetW) > 1) {
+                obj.set({ scaleX: targetW / obj.width, scaleY: targetH / obj.height })
+                needsRender = true
+              }
+            } else if (['rect', 'circle', 'triangle'].includes(field.type)) {
+              if (field.type === 'rect' || field.type === 'triangle') {
+                if (Math.abs(obj.width - (field.width || 100)) > 1) { obj.set('width', field.width || 100); needsRender = true }
+                if (Math.abs(obj.height - (field.height || 100)) > 1) { obj.set('height', field.height || 100); needsRender = true }
+              } else if (field.type === 'circle') {
+                if (Math.abs(obj.radius - (field.radius || 50)) > 1) { obj.set('radius', field.radius || 50); needsRender = true }
+              }
+            }
+            if (obj.fill !== field.color) { obj.set('fill', field.color); needsRender = true }
+            if (obj.opacity !== (field.opacity ?? 1)) { obj.set('opacity', field.opacity ?? 1); needsRender = true }
+          }
+
+          if (obj instanceof IText || obj.type === 'i-text' || obj.type === 'IText') {
+            let textVal = ''
+            if (field.type === 'staticText') {
+              textVal = field.text || ''
+              if (textVal === '{Date}') {
+                textVal = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+              }
+            } else if (field.type === 'uuid') {
+              const rowIdx = (previewRowIndex >= 0 && previewRowIndex < csvData.length) ? previewRowIndex : 0
+              const row = csvData[rowIdx]
+              if (row) {
+                const email = row?.Email || row?.email || ''
+                const name = row?.[csvColumns[0]] || ''
+                const cert = certificates.find(c => (email && c.recipient_email === email) || (name && c.recipient_name === name))
+                textVal = cert ? cert.certificate_uuid.split('-')[0].toUpperCase() : 'ID: XXXXXXXX'
+              } else { textVal = 'ID: XXXXXXXX' }
+            } else {
+              const rowIdx = (previewRowIndex >= 0 && previewRowIndex < csvData.length) ? previewRowIndex : 0
+              const row = csvData[rowIdx]
+              textVal = (row && field.column) ? formatFieldValue(row[field.column]) : `{${field.column}}`
+            }
+
+            if (obj.text !== textVal) { obj.set('text', textVal); needsRender = true }
+            if (obj.fontSize !== field.fontSize) { obj.set('fontSize', field.fontSize); needsRender = true }
+            if (obj.fill !== field.color) { obj.set('fill', field.color); needsRender = true }
+            if (obj.fontFamily !== field.fontFamily) { obj.set('fontFamily', field.fontFamily); needsRender = true }
+            const weight = field.bold ? 'bold' : 'normal'
+            if (obj.fontWeight !== weight) { obj.set('fontWeight', weight); needsRender = true }
+            if (obj.textAlign !== field.textAlign) { obj.set('textAlign', field.textAlign); needsRender = true }
+            if (obj.originX !== originX) { obj.set('originX', originX); needsRender = true }
           }
         }
-        
+
         // Correctly maintain ordering: Background is at 0, components follow
         if (obj) {
-            const currentObjIdx = canvas.getObjects().indexOf(obj)
-            if (currentObjIdx !== idx + 1) {
-                canvas.moveObjectTo(obj, idx + 1)
-                needsRender = true
-            }
+          const currentObjIdx = canvas.getObjects().indexOf(obj)
+          if (currentObjIdx !== idx + 1) {
+            canvas.moveObjectTo(obj, idx + 1)
+            needsRender = true
+          }
         }
       }
 
@@ -1250,7 +1252,7 @@ export default function Editor(){
     }, 50)
 
     return () => {
-        if(syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current)
+      if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current)
     }
   }, [textFields, canvasReady, isLoading, csvData.length, previewRowIndex, csvColumns.length, certificates.length])
 
@@ -1280,11 +1282,11 @@ export default function Editor(){
 
   const handleImage = useCallback((e) => {
     const file = e.target.files[0]
-    if(!file) return
+    if (!file) return
     const reader = new FileReader()
-    reader.onload = (ev)=>{
+    reader.onload = (ev) => {
       const img = new Image()
-      img.onload = ()=> {
+      img.onload = () => {
         setUploadedImage(img)
       }
       img.src = ev.target.result
@@ -1296,14 +1298,14 @@ export default function Editor(){
 
   const handleCSV = useCallback((e) => {
     const f = e.target.files[0]
-    if(!f) return
+    if (!f) return
     const r = new FileReader()
-    r.onload = (ev)=>{
+    r.onload = (ev) => {
       const text = ev.target.result
-      const rows = text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean)
-      
-      if(rows.length === 0) return
-      
+      const rows = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
+
+      if (rows.length === 0) return
+
       // Parse CSV with headers
       const headers = rows[0].split(',').map(h => h.replace(/^\uFEFF/, '').trim())
       const data = rows.slice(1).map(row => {
@@ -1314,10 +1316,10 @@ export default function Editor(){
         })
         return obj
       })
-      
+
       setCsvColumns(headers)
       setCsvData(data)
-      
+
       // Keep backward compatibility with names array
       const names = data.map(row => row[headers[0]] || '')
       setNames(names)
@@ -1327,10 +1329,10 @@ export default function Editor(){
   }, [uploadedImage, textFields])
 
   const saveImages = useCallback(async () => {
-    if(!uploadedImage) return alert('Upload an image first')
-    if(csvData.length === 0) return alert('Upload CSV data first')
+    if (!uploadedImage) return alert('Upload an image first')
+    if (csvData.length === 0) return alert('Upload CSV data first')
     setSaving(true)
-    
+
     try {
       // 1. PRE-FETCH FIXED ASSETS (Assets that don't change per row)
       const assetMap = new Map()
@@ -1347,117 +1349,117 @@ export default function Editor(){
       const canvasEl = document.createElement('canvas')
       canvasEl.width = uploadedImage.width * multiplier
       canvasEl.height = uploadedImage.height * multiplier
-      
+
       const staticCanvas = new StaticCanvas(canvasEl, {
-          width: uploadedImage.width * multiplier,
-          height: uploadedImage.height * multiplier,
-          backgroundVpt: false
+        width: uploadedImage.width * multiplier,
+        height: uploadedImage.height * multiplier,
+        backgroundVpt: false
       })
       staticCanvas.setZoom(multiplier)
-      
+
       const bg = new FabricImage(uploadedImage, { originX: 'left', originY: 'top' })
-      
+
       // 2. MAIN BATCH LOOP
       for (let idx = 0; idx < csvData.length; idx++) {
         const row = csvData[idx]
         const email = row?.Email || row?.email || ''
         const name = row?.[csvColumns[0]] || ''
-        
-        let existingCert = certificates.find(c => 
+
+        let existingCert = certificates.find(c =>
           (email && c.recipient_email === email) || (name && c.recipient_name === name)
         )
-        
+
         let certificateUuid = existingCert?.certificate_uuid
         if (!certificateUuid) {
           certificateUuid = uuidv4()
           if (user && campaignId) {
-             supabase.from('certificates').insert({
-               certificate_uuid: certificateUuid, campaign_id: campaignId, user_id: user.id,
-               recipient_data: row, recipient_name: name, recipient_email: email, status: 'generated'
-             }).then(() => {
-               setCertificates(prev => [...prev, { certificate_uuid: certificateUuid, recipient_email: email, recipient_name: name }])
-             })
+            supabase.from('certificates').insert({
+              certificate_uuid: certificateUuid, campaign_id: campaignId, user_id: user.id,
+              recipient_data: row, recipient_name: name, recipient_email: email, status: 'generated'
+            }).then(() => {
+              setCertificates(prev => [...prev, { certificate_uuid: certificateUuid, recipient_email: email, recipient_name: name }])
+            })
           }
         }
-        
+
         const verificationUrl = `https://certifyflow.com/verify/${certificateUuid}`
-        
+
         staticCanvas.clear()
         staticCanvas.add(bg)
-        
-        for (const field of textFields) {
-           if (field.type === 'image') {
-               const cachedImg = assetMap.get(field.id)
-               if (cachedImg) {
-                 const img = new FabricImage(cachedImg.getElement(), {
-                   left: field.x, top: field.y,
-                   scaleX: (field.width || 100) / cachedImg.width,
-                   scaleY: (field.height || 100) / cachedImg.height,
-                   originX: 'left', originY: 'top',
-                   angle: field.rotation || 0
-                 })
-                 staticCanvas.add(img)
-               }
-           } else if (field.type === 'qrcode') {
-               const qrDataUrl = await QRCode.toDataURL(verificationUrl, { width: field.size || 100, margin: 1 })
-               const qrImg = await FabricImage.fromURL(qrDataUrl)
-               qrImg.set({
-                   left: field.x, top: field.y,
-                   scaleX: (field.size || 100) / qrImg.width,
-                   scaleY: (field.size || 100) / qrImg.height,
-                   originX: 'left', originY: 'top',
-                   angle: field.rotation || 0
-               })
-               staticCanvas.add(qrImg)
-           } else if (['rect', 'circle', 'triangle'].includes(field.type)) {
-               const common = {
-                   left: field.x, top: field.y,
-                   fill: field.color || "#A098FF",
-                   opacity: field.opacity ?? 1,
-                   scaleX: field.scaleX || 1,
-                   scaleY: field.scaleY || 1,
-                   angle: field.rotation || 0,
-                   originX: "left", originY: "top"
-               }
-               let shapeObj;
-               if (field.type === "rect") shapeObj = new Rect({ ...common, width: field.width || 100, height: field.height || 100 })
-               else if (field.type === "circle") shapeObj = new Circle({ ...common, radius: field.radius || ((field.width || 100) / 2) })
-               else if (field.type === "triangle") shapeObj = new Triangle({ ...common, width: field.width || 100, height: field.height || 100 })
-               if (shapeObj) staticCanvas.add(shapeObj)
-           } else {
-               let text = ""
-               if (field.type === "uuid") text = certificateUuid.split("-")[0].toUpperCase()
-               else if (field.type === "staticText") text = field.text || ""
-               else text = row[field.column] || ""
 
-               const originX = field.textAlign === "center" ? "center" : (field.textAlign === "right" ? "right" : "left")
-               const obj = new IText(text, {
-                   left: field.x, top: field.y,
-                   fontSize: field.fontSize,
-                   fill: field.color,
-                   fontFamily: field.fontFamily || "Arial",
-                   fontWeight: field.bold ? "bold" : "normal",
-                   fontStyle: field.italic ? "italic" : "normal",
-                   textAlign: field.textAlign,
-                   originX: originX, originY: "top",
-                   scaleX: field.scaleX || 1, scaleY: field.scaleY || 1,
-                   angle: field.rotation || 0
-               })
-               staticCanvas.add(obj)
-           }
+        for (const field of textFields) {
+          if (field.type === 'image') {
+            const cachedImg = assetMap.get(field.id)
+            if (cachedImg) {
+              const img = new FabricImage(cachedImg.getElement(), {
+                left: field.x, top: field.y,
+                scaleX: (field.width || 100) / cachedImg.width,
+                scaleY: (field.height || 100) / cachedImg.height,
+                originX: 'left', originY: 'top',
+                angle: field.rotation || 0
+              })
+              staticCanvas.add(img)
+            }
+          } else if (field.type === 'qrcode') {
+            const qrDataUrl = await QRCode.toDataURL(verificationUrl, { width: field.size || 100, margin: 1 })
+            const qrImg = await FabricImage.fromURL(qrDataUrl)
+            qrImg.set({
+              left: field.x, top: field.y,
+              scaleX: (field.size || 100) / qrImg.width,
+              scaleY: (field.size || 100) / qrImg.height,
+              originX: 'left', originY: 'top',
+              angle: field.rotation || 0
+            })
+            staticCanvas.add(qrImg)
+          } else if (['rect', 'circle', 'triangle'].includes(field.type)) {
+            const common = {
+              left: field.x, top: field.y,
+              fill: field.color || "#A098FF",
+              opacity: field.opacity ?? 1,
+              scaleX: field.scaleX || 1,
+              scaleY: field.scaleY || 1,
+              angle: field.rotation || 0,
+              originX: "left", originY: "top"
+            }
+            let shapeObj;
+            if (field.type === "rect") shapeObj = new Rect({ ...common, width: field.width || 100, height: field.height || 100 })
+            else if (field.type === "circle") shapeObj = new Circle({ ...common, radius: field.radius || ((field.width || 100) / 2) })
+            else if (field.type === "triangle") shapeObj = new Triangle({ ...common, width: field.width || 100, height: field.height || 100 })
+            if (shapeObj) staticCanvas.add(shapeObj)
+          } else {
+            let text = ""
+            if (field.type === "uuid") text = certificateUuid.split("-")[0].toUpperCase()
+            else if (field.type === "staticText") text = field.text || ""
+            else text = row[field.column] || ""
+
+            const originX = field.textAlign === "center" ? "center" : (field.textAlign === "right" ? "right" : "left")
+            const obj = new IText(text, {
+              left: field.x, top: field.y,
+              fontSize: field.fontSize,
+              fill: field.color,
+              fontFamily: field.fontFamily || "Arial",
+              fontWeight: field.bold ? "bold" : "normal",
+              fontStyle: field.italic ? "italic" : "normal",
+              textAlign: field.textAlign,
+              originX: originX, originY: "top",
+              scaleX: field.scaleX || 1, scaleY: field.scaleY || 1,
+              angle: field.rotation || 0
+            })
+            staticCanvas.add(obj)
+          }
         }
-        
+
         staticCanvas.renderAll()
         const dataUrl = canvasEl.toDataURL('image/png')
         const base64Data = dataUrl.split(',')[1]
         const filename = row[csvColumns[0]] || `certificate_${idx + 1}`
-        zip.file(`${filename}.png`, base64Data, {base64: true})
-        
+        zip.file(`${filename}.png`, base64Data, { base64: true })
+
         // Yield to UI thread every 10 rows to prevent freezing
         if (idx % 10 === 0) await new Promise(r => setTimeout(r, 0))
       }
-      
-      const zipBlob = await zip.generateAsync({type: 'blob'})
+
+      const zipBlob = await zip.generateAsync({ type: 'blob' })
       const link = document.createElement('a')
       link.download = 'certificates.zip'
       link.href = URL.createObjectURL(zipBlob)
@@ -1470,25 +1472,25 @@ export default function Editor(){
       toast.error('Export failed')
     } finally { setSaving(false) }
   }, [uploadedImage, csvData, csvColumns, textFields, certificates, user, campaignId])
-  
+
   // Helper function to load image from data URL
   // Helper to format values (especially dates)
   function formatFieldValue(value) {
     if (!value) return ''
     const valStr = String(value)
-    
+
     // Check if it's a date string (Y-m-d or ISO with time)
     // Looking for patterns like 2025-11-17 or ISO 8601
     const dateRegex = /^\d{4}-\d{2}-\d{2}/
     if (dateRegex.test(valStr)) {
-        const date = new Date(valStr)
-        if (!isNaN(date.getTime())) {
-            return date.toLocaleDateString('en-US', { 
-                month: 'long', 
-                day: 'numeric', 
-                year: 'numeric' 
-            })
-        }
+      const date = new Date(valStr)
+      if (!isNaN(date.getTime())) {
+        return date.toLocaleDateString('en-US', {
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric'
+        })
+      }
     }
     return valStr
   }
@@ -1526,9 +1528,9 @@ export default function Editor(){
           shapeStyle += `width: ${f.width || 100}px; height: ${f.height || 100}px;`;
         } else if (f.type === "circle") {
           const r = f.radius || 50;
-          shapeStyle += `width: ${r*2}px; height: ${r*2}px; border-radius: 50%; margin-left: -${r}px; margin-top: -${r}px;`;
+          shapeStyle += `width: ${r * 2}px; height: ${r * 2}px; border-radius: 50%; margin-left: -${r}px; margin-top: -${r}px;`;
         } else if (f.type === "triangle") {
-          shapeStyle += `width: 0; height: 0; background: transparent; border-left: ${(f.width || 100)/2}px solid transparent; border-right: ${(f.width || 100)/2}px solid transparent; border-bottom: ${f.height || 100}px solid ${f.color || "#A098FF"};`;
+          shapeStyle += `width: 0; height: 0; background: transparent; border-left: ${(f.width || 100) / 2}px solid transparent; border-right: ${(f.width || 100) / 2}px solid transparent; border-bottom: ${f.height || 100}px solid ${f.color || "#A098FF"};`;
         }
         return `<div class="cert-layer cert-shape" style="${shapeStyle}"></div>`;
       }
@@ -1552,9 +1554,9 @@ export default function Editor(){
         line-height: ${f.lineHeight || 1.16};
         transform: translate(${originX}, 0) rotate(${f.rotation || 0}deg) scale(${f.scaleX || 1}, ${f.scaleY || 1});
       `;
-      
+
       let textContent = f.type === "staticText" ? f.text : `{${f.column}}`;
-      if(textContent === "{Date}") textContent = new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+      if (textContent === "{Date}") textContent = new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 
       return `<div class="cert-layer cert-text" style="${textStyle}">${textContent || ""}</div>`;
     }).join("");
@@ -1586,16 +1588,16 @@ export default function Editor(){
   // Generate a high-fidelity background image from HTML/CSS and detect placeholder positions
   async function generateTemplateBackground(template) {
     console.log('Rendering template & detecting text elements...')
-    
+
     const container = document.createElement('div')
     container.style.position = 'absolute'
     container.style.left = '-9999px'
     container.style.top = '-9999px'
     container.style.width = '800px'
     container.style.height = '600px'
-    
+
     const detectedFields = []
-    
+
     // Convert {{placeholders}} to invisible spans we can measure
     // Placeholders will be rendered as Fabric.js layers, not baked into background
     // Static text remains visible and gets baked into the background image
@@ -1604,14 +1606,14 @@ export default function Editor(){
 
     const htmlWithDetectors = htmlSource
       .replace(/\{\{([^}]+)\}\}/g, (match, col) => {
-          return `<span class="placeholder-detector" data-column="${col}" data-type="placeholder" style="visibility: hidden; display: inline-block;">${match}</span>`
+        return `<span class="placeholder-detector" data-column="${col}" data-type="placeholder" style="visibility: hidden; display: inline-block;">${match}</span>`
       })
       .replace(/<(h[1-6]|p|span|div)([^>]*)>/gi, (match, tag, attrs) => {
-          if (match.toLowerCase().includes('placeholder-detector')) return match
-          if (attrs.toLowerCase().includes('class=')) {
-              return `<${tag}${attrs.replace(/class=["']/i, '$&static-text-detector ')}>`
-          }
-          return `<${tag}${attrs} class="static-text-detector">`
+        if (match.toLowerCase().includes('placeholder-detector')) return match
+        if (attrs.toLowerCase().includes('class=')) {
+          return `<${tag}${attrs.replace(/class=["']/i, '$&static-text-detector ')}>`
+        }
+        return `<${tag}${attrs} class="static-text-detector">`
       })
 
     const tempDiv = document.createElement('div')
@@ -1633,82 +1635,82 @@ export default function Editor(){
     try {
       if (document.fonts) await document.fonts.ready
       await new Promise(resolve => setTimeout(resolve, 500)) // Time for layout
-      
+
       const containerRect = tempDiv.getBoundingClientRect()
-      
+
       // First, detect placeholders
       const detectors = tempDiv.querySelectorAll('.placeholder-detector')
       detectors.forEach(el => {
-          const rect = el.getBoundingClientRect()
-          const style = window.getComputedStyle(el)
-          detectedFields.push({
-              column: el.getAttribute('data-column'),
-              type: 'text',
-              x: rect.left - containerRect.left + (rect.width / 2),
-              y: rect.top - containerRect.top + (rect.height / 2),
-              fontSize: parseInt(style.fontSize) || 40,
-              color: style.color || '#000000',
-              fontFamily: style.fontFamily?.split(',')[0].replace(/['"]/g, '') || 'Arial',
-              bold: style.fontWeight === 'bold' || parseInt(style.fontWeight) >= 700,
-              italic: style.fontStyle === 'italic',
-              textAlign: 'center'
-          })
+        const rect = el.getBoundingClientRect()
+        const style = window.getComputedStyle(el)
+        detectedFields.push({
+          column: el.getAttribute('data-column'),
+          type: 'text',
+          x: rect.left - containerRect.left + (rect.width / 2),
+          y: rect.top - containerRect.top + (rect.height / 2),
+          fontSize: parseInt(style.fontSize) || 40,
+          color: style.color || '#000000',
+          fontFamily: style.fontFamily?.split(',')[0].replace(/['"]/g, '') || 'Arial',
+          bold: style.fontWeight === 'bold' || parseInt(style.fontWeight) >= 700,
+          italic: style.fontStyle === 'italic',
+          textAlign: 'center'
+        })
       })
-      
+
       // Now detect all other text elements (h1, h2, h3, p, span, etc.)
       const textSelectors = '.static-text-detector'
       const textElements = tempDiv.querySelectorAll(textSelectors)
-      
+
       textElements.forEach(el => {
-          // Check if this element contains a placeholder
-          if (el.querySelector('.placeholder-detector')) return
+        // Check if this element contains a placeholder
+        if (el.querySelector('.placeholder-detector')) return
 
-          const textContent = el.innerText.trim()
-          
-          // Only add if there's actual text content and it's not a placeholder
-          if (textContent && textContent.length > 0 && !textContent.includes('{{')) {
-              // Avoid adding parent if children were added - check if any child is also a detector
-              const childDetectors = el.querySelectorAll('.static-text-detector')
-              if (childDetectors.length > 0) return
+        const textContent = el.innerText.trim()
 
-              const rect = el.getBoundingClientRect()
-              const style = window.getComputedStyle(el)
-              
-              // Skip if element is too small or invisible
-              if (rect.width < 2 || rect.height < 2) return
-              if (style.display === 'none' || style.visibility === 'hidden') return
-              
-              // Get text alignment
-              let textAlign = style.textAlign || 'center'
-              if (textAlign === 'start' || textAlign === '-webkit-center') textAlign = 'center'
-              
-              // Convert RGB color to hex
-              let hexColor = '#000000'
-              if (style.color) {
-                  const rgb = style.color.match(/\d+/g)
-                  if (rgb && rgb.length >= 3) {
-                      hexColor = '#' + rgb.slice(0, 3).map(x => {
-                          const hex = parseInt(x).toString(16)
-                          return hex.length === 1 ? '0' + hex : hex
-                      }).join('')
-                  }
-              }
-              
-              detectedFields.push({
-                  type: 'staticText',
-                  text: textContent,
-                  x: rect.left - containerRect.left + (rect.width / 2),
-                  y: rect.top - containerRect.top + (rect.height / 2),
-                  fontSize: parseInt(style.fontSize) || 16,
-                  color: hexColor,
-                  fontFamily: style.fontFamily?.split(',')[0].replace(/['"]/g, '') || 'Arial',
-                  bold: style.fontWeight === 'bold' || parseInt(style.fontWeight) >= 700,
-                  italic: style.fontStyle === 'italic',
-                  textAlign: textAlign
-              })
+        // Only add if there's actual text content and it's not a placeholder
+        if (textContent && textContent.length > 0 && !textContent.includes('{{')) {
+          // Avoid adding parent if children were added - check if any child is also a detector
+          const childDetectors = el.querySelectorAll('.static-text-detector')
+          if (childDetectors.length > 0) return
+
+          const rect = el.getBoundingClientRect()
+          const style = window.getComputedStyle(el)
+
+          // Skip if element is too small or invisible
+          if (rect.width < 2 || rect.height < 2) return
+          if (style.display === 'none' || style.visibility === 'hidden') return
+
+          // Get text alignment
+          let textAlign = style.textAlign || 'center'
+          if (textAlign === 'start' || textAlign === '-webkit-center') textAlign = 'center'
+
+          // Convert RGB color to hex
+          let hexColor = '#000000'
+          if (style.color) {
+            const rgb = style.color.match(/\d+/g)
+            if (rgb && rgb.length >= 3) {
+              hexColor = '#' + rgb.slice(0, 3).map(x => {
+                const hex = parseInt(x).toString(16)
+                return hex.length === 1 ? '0' + hex : hex
+              }).join('')
+            }
           }
+
+          detectedFields.push({
+            type: 'staticText',
+            text: textContent,
+            x: rect.left - containerRect.left + (rect.width / 2),
+            y: rect.top - containerRect.top + (rect.height / 2),
+            fontSize: parseInt(style.fontSize) || 16,
+            color: hexColor,
+            fontFamily: style.fontFamily?.split(',')[0].replace(/['"]/g, '') || 'Arial',
+            bold: style.fontWeight === 'bold' || parseInt(style.fontWeight) >= 700,
+            italic: style.fontStyle === 'italic',
+            textAlign: textAlign
+          })
+        }
       })
-      
+
       console.log('Detected text elements:', detectedFields.length, 'total')
       console.log('- Placeholders:', detectedFields.filter(f => f.type === 'text').length)
       console.log('- Static text:', detectedFields.filter(f => f.type === 'staticText').length)
@@ -1716,7 +1718,7 @@ export default function Editor(){
       // Hide all detected text elements before capturing background
       const allDetectors = tempDiv.querySelectorAll('.placeholder-detector, .static-text-detector')
       allDetectors.forEach(el => {
-          el.style.visibility = 'hidden'
+        el.style.visibility = 'hidden'
       })
       const canvas = await html2canvas(tempDiv, {
         width: 800,
@@ -1726,14 +1728,14 @@ export default function Editor(){
         backgroundColor: null,
         logging: false
       })
-      
+
       const img = await loadImage(canvas.toDataURL('image/png'))
       document.body.removeChild(container)
       return { img, detectedFields }
     } catch (error) {
       console.error('Hybrid rendering failed:', error)
       if (container.parentNode) document.body.removeChild(container)
-      
+
       const canvas = document.createElement('canvas')
       canvas.width = 800; canvas.height = 600
       const ctx = canvas.getContext('2d')
@@ -1748,26 +1750,26 @@ export default function Editor(){
   async function sendCertificatesViaEmail(config) {
     if (!uploadedImage) return alert('Upload an image first')
     if (csvData.length === 0) return alert('Upload CSV data first')
-    
+
     // Check email settings
     const emailProvider = localStorage.getItem('emailProvider')
     const apiKey = localStorage.getItem('emailApiKey')
     const fromEmail = localStorage.getItem('fromEmail')
     const fromName = localStorage.getItem('fromName')
-    
+
     if (!apiKey || !fromEmail) {
       if (confirm('Email provider not configured. Go to Settings?')) {
         navigate.push('/dashboard/email-settings')
       }
       return
     }
-    
+
     // Check if CSV has email column
     const emailColumn = csvColumns.find(col => col.toLowerCase().includes('email'))
     if (!emailColumn) {
       return alert('CSV must have an "Email" column to send certificates')
     }
-    
+
     // Reset batch state
     setBatchModalOpen(true)
     setBatchProgress(0)
@@ -1777,33 +1779,33 @@ export default function Editor(){
     setBatchIsCompleted(false)
     setSendingEmails(true)
     setEmailsSent(0)
-    
+
     // Update campaign status to processing
     if (campaignId) {
       await campaignService.updateCampaign(campaignId, { status: 'processing' })
     }
-    
+
     try {
       // Use StaticCanvas for export to ensure consistency with editor
       const multiplier = 2
       const canvasEl = document.createElement('canvas')
       canvasEl.width = uploadedImage.width * multiplier
       canvasEl.height = uploadedImage.height * multiplier
-      
+
       const staticCanvas = new StaticCanvas(canvasEl, {
-          width: uploadedImage.width * multiplier,
-          height: uploadedImage.height * multiplier,
-          backgroundVpt: false
+        width: uploadedImage.width * multiplier,
+        height: uploadedImage.height * multiplier,
+        backgroundVpt: false
       })
       staticCanvas.setZoom(multiplier)
-      
+
       const bg = new FabricImage(uploadedImage, {
-          originX: 'left', originY: 'top'
+        originX: 'left', originY: 'top'
       })
-      
+
       let successCount = 0;
       const total = csvData.length;
-      
+
       for (let idx = 0; idx < total; idx++) {
         // Pause check
         while (batchIsPausedRef.current) {
@@ -1813,93 +1815,93 @@ export default function Editor(){
         setBatchIdx(idx + 1)
         const row = csvData[idx]
         const recipientEmail = row[emailColumn]
-        
+
         if (!recipientEmail) {
           console.warn(`Skipping row ${idx}: no email`)
           continue
         }
-        
+
         const certificateUuid = uuidv4()
         const verificationUrl = `https://certifyflow.com/verify/${certificateUuid}`
-        
+
         staticCanvas.clear()
         staticCanvas.add(bg)
-        
+
         // Draw all fields
         for (const field of textFields) {
-           if (field.type === 'image' && field.src) {
-               const img = await FabricImage.fromURL(field.src)
-               img.set({
-                   left: field.x, top: field.y,
-                   scaleX: (field.width || 100) / img.width,
-                   scaleY: (field.height || 100) / img.height,
-                   originX: 'left', originY: 'top',
-                   angle: field.rotation || 0
-               })
-               staticCanvas.add(img)
-           } else if (field.type === 'qrcode') {
-               const qrDataUrl = await QRCode.toDataURL(verificationUrl, { width: field.size || 100, margin: 1 })
-               const qrImg = await FabricImage.fromURL(qrDataUrl)
-               qrImg.set({
-                   left: field.x, top: field.y,
-                   scaleX: (field.size || 100) / qrImg.width,
-                   scaleY: (field.size || 100) / qrImg.height,
-                   originX: 'left', originY: 'top',
-                   angle: field.rotation || 0
-               })
-               staticCanvas.add(qrImg)
-           } else if (['rect', 'circle', 'triangle'].includes(field.type)) {
-               const common = {
-                   left: field.x, top: field.y,
-                   fill: field.color || "#A098FF",
-                   opacity: field.opacity ?? 1,
-                   scaleX: field.scaleX || 1,
-                   scaleY: field.scaleY || 1,
-                   angle: field.rotation || 0,
-                   originX: "left", originY: "top"
-               }
-               let shapeObj;
-               if (field.type === "rect") {
-                   shapeObj = new Rect({ ...common, width: field.width || 100, height: field.height || 100 })
-               } else if (field.type === "circle") {
-                   shapeObj = new Circle({ ...common, radius: field.radius || ((field.width || 100) / 2) })
-               } else if (field.type === "triangle") {
-                   shapeObj = new Triangle({ ...common, width: field.width || 100, height: field.height || 100 })
-               }
-               if (shapeObj) staticCanvas.add(shapeObj)
-           } else {
-               // Text
-               let text = ""
-               if (field.type === "uuid") {
-                   text = certificateUuid.split("-")[0].toUpperCase()
-               } else if (field.type === "staticText") {
-                   text = field.text || ""
-               } else {
-                   text = row[field.column] || ""
-               }
-               const originX = field.textAlign === "center" ? "center" : (field.textAlign === "right" ? "right" : "left")
-               const obj = new IText(text, {
-                   left: field.x, top: field.y,
-                   fontSize: field.fontSize,
-                   fill: field.color,
-                   fontFamily: field.fontFamily || "Arial",
-                   fontWeight: field.bold ? "bold" : "normal",
-                   fontStyle: field.italic ? "italic" : "normal",
-                   textAlign: field.textAlign,
-                   originX: originX,
-                   originY: "top",
-                   scaleX: field.scaleX || 1,
-                   scaleY: field.scaleY || 1,
-                   angle: field.rotation || 0
-               })
-               staticCanvas.add(obj)
-           }
+          if (field.type === 'image' && field.src) {
+            const img = await FabricImage.fromURL(field.src)
+            img.set({
+              left: field.x, top: field.y,
+              scaleX: (field.width || 100) / img.width,
+              scaleY: (field.height || 100) / img.height,
+              originX: 'left', originY: 'top',
+              angle: field.rotation || 0
+            })
+            staticCanvas.add(img)
+          } else if (field.type === 'qrcode') {
+            const qrDataUrl = await QRCode.toDataURL(verificationUrl, { width: field.size || 100, margin: 1 })
+            const qrImg = await FabricImage.fromURL(qrDataUrl)
+            qrImg.set({
+              left: field.x, top: field.y,
+              scaleX: (field.size || 100) / qrImg.width,
+              scaleY: (field.size || 100) / qrImg.height,
+              originX: 'left', originY: 'top',
+              angle: field.rotation || 0
+            })
+            staticCanvas.add(qrImg)
+          } else if (['rect', 'circle', 'triangle'].includes(field.type)) {
+            const common = {
+              left: field.x, top: field.y,
+              fill: field.color || "#A098FF",
+              opacity: field.opacity ?? 1,
+              scaleX: field.scaleX || 1,
+              scaleY: field.scaleY || 1,
+              angle: field.rotation || 0,
+              originX: "left", originY: "top"
+            }
+            let shapeObj;
+            if (field.type === "rect") {
+              shapeObj = new Rect({ ...common, width: field.width || 100, height: field.height || 100 })
+            } else if (field.type === "circle") {
+              shapeObj = new Circle({ ...common, radius: field.radius || ((field.width || 100) / 2) })
+            } else if (field.type === "triangle") {
+              shapeObj = new Triangle({ ...common, width: field.width || 100, height: field.height || 100 })
+            }
+            if (shapeObj) staticCanvas.add(shapeObj)
+          } else {
+            // Text
+            let text = ""
+            if (field.type === "uuid") {
+              text = certificateUuid.split("-")[0].toUpperCase()
+            } else if (field.type === "staticText") {
+              text = field.text || ""
+            } else {
+              text = row[field.column] || ""
+            }
+            const originX = field.textAlign === "center" ? "center" : (field.textAlign === "right" ? "right" : "left")
+            const obj = new IText(text, {
+              left: field.x, top: field.y,
+              fontSize: field.fontSize,
+              fill: field.color,
+              fontFamily: field.fontFamily || "Arial",
+              fontWeight: field.bold ? "bold" : "normal",
+              fontStyle: field.italic ? "italic" : "normal",
+              textAlign: field.textAlign,
+              originX: originX,
+              originY: "top",
+              scaleX: field.scaleX || 1,
+              scaleY: field.scaleY || 1,
+              angle: field.rotation || 0
+            })
+            staticCanvas.add(obj)
+          }
         }
-        
+
         staticCanvas.renderAll()
         const certificateDataUrl = canvasEl.toDataURL('image/png')
         const recipientName = row[csvColumns[0]] || 'Recipient'
-        
+
         // Send email
         try {
           const response = await fetch('/api/send-email', {
@@ -1933,12 +1935,12 @@ export default function Editor(){
               fromEmail: fromEmail
             })
           })
-          
+
           if (response.ok) {
             successCount++;
             setEmailsSent(successCount);
           }
-          
+
           // Save certificate to database
           if (user && campaignId) {
             await supabase.from('certificates').insert({
@@ -1951,21 +1953,21 @@ export default function Editor(){
               verification_url: verificationUrl,
               status: 'sent'
             })
-            
+
             // Update campaign progress
-            await campaignService.updateCampaign(campaignId, { 
+            await campaignService.updateCampaign(campaignId, {
               emails_sent: successCount,
-              certificates_generated: idx + 1 
+              certificates_generated: idx + 1
             })
           }
         } catch (err) {
           console.error(`Error sending email to ${recipientEmail}:`, err)
         }
-        
+
         setBatchProgress(Math.round(((idx + 1) / total) * 100))
         await new Promise(resolve => setTimeout(resolve, 200)) // Small delay
       }
-      
+
       setBatchIsCompleted(true)
       if (campaignId) {
         await campaignService.updateCampaign(campaignId, { status: 'completed' })
@@ -1981,20 +1983,20 @@ export default function Editor(){
       setSendingEmails(false)
     }
   }
-  
+
   async function handlePrint() {
     if (!uploadedImage) { toast.error('Upload image first'); return }
     if (csvData.length === 0) { toast.error('Upload CSV data first'); return }
-    
+
     setSaving(true)
-    
+
     try {
       const printWindow = window.open('', '_blank')
       if (!printWindow) {
-         toast.error('Popup blocked. Please allow popups.')
-         return 
+        toast.error('Popup blocked. Please allow popups.')
+        return
       }
-      
+
       printWindow.document.write('<html><head><title>Print Certificates</title>')
       printWindow.document.write('<style>')
       printWindow.document.write(`
@@ -2012,7 +2014,7 @@ export default function Editor(){
         @media print { .controls { display: none; } }
       `)
       printWindow.document.write('</style></head><body>')
-      
+
       printWindow.document.write('<div class="controls"><button class="btn" onclick="window.print()">Print Certificates</button></div>')
 
       // Use StaticCanvas for consistency with high resolution for print
@@ -2020,16 +2022,16 @@ export default function Editor(){
       const canvasEl = document.createElement('canvas')
       canvasEl.width = uploadedImage.width * multiplier
       canvasEl.height = uploadedImage.height * multiplier
-      
+
       const staticCanvas = new StaticCanvas(canvasEl, {
-          width: uploadedImage.width * multiplier,
-          height: uploadedImage.height * multiplier,
-          backgroundVpt: false
+        width: uploadedImage.width * multiplier,
+        height: uploadedImage.height * multiplier,
+        backgroundVpt: false
       })
       staticCanvas.setZoom(multiplier)
-      
+
       const bg = new FabricImage(uploadedImage, {
-          originX: 'left', originY: 'top'
+        originX: 'left', originY: 'top'
       })
       staticCanvas.add(bg)
 
@@ -2037,12 +2039,12 @@ export default function Editor(){
         const row = csvData[idx]
         const email = row?.Email || row?.email || ''
         const name = row?.[csvColumns[0]] || ''
-        
-        let existingCert = certificates.find(c => 
-          (email && c.recipient_email === email) || 
+
+        let existingCert = certificates.find(c =>
+          (email && c.recipient_email === email) ||
           (name && c.recipient_name === name)
         )
-        
+
         let certificateUuid = existingCert?.certificate_uuid
         if (!certificateUuid) {
           certificateUuid = uuidv4()
@@ -2061,98 +2063,98 @@ export default function Editor(){
             })
           }
         }
-        
+
         const verificationUrl = `https://certifyflow.com/verify/${certificateUuid}`
 
         staticCanvas.clear()
         staticCanvas.add(bg)
-        
+
         for (const field of textFields) {
-           if (field.type === 'image' && field.src) {
-               const img = await FabricImage.fromURL(field.src)
-               img.set({
-                   left: field.x, top: field.y,
-                   scaleX: (field.width || 100) / img.width,
-                   scaleY: (field.height || 100) / img.height,
-                   originX: 'left', originY: 'top'
-               })
-               staticCanvas.add(img)
-           } else if (field.type === 'qrcode') {
-               const qrDataUrl = await QRCode.toDataURL(verificationUrl, { width: field.size, margin: 1 })
-               const qrImg = await FabricImage.fromURL(qrDataUrl)
-               qrImg.set({
-                   left: field.x, top: field.y,
-                   scaleX: field.size / qrImg.width,
-                   scaleY: field.size / qrImg.height,
-                   originX: 'left', originY: 'top'
-               })
-               staticCanvas.add(qrImg)
-            } else if (["rect", "circle", "triangle"].includes(field.type)) {
-                const common = {
-                    left: field.x, top: field.y,
-                    fill: field.color || "#A098FF",
-                    opacity: field.opacity ?? 1,
-                    scaleX: field.scaleX || 1,
-                    scaleY: field.scaleY || 1,
-                    angle: field.rotation || 0,
-                    originX: "left", originY: "top"
-                }
-                let shapeObj;
-                if (field.type === "rect") {
-                    shapeObj = new Rect({ ...common, width: field.width || 100, height: field.height || 100 })
-                } else if (field.type === "circle") {
-                    shapeObj = new Circle({ ...common, radius: field.radius || ((field.width || 100) / 2) })
-                } else if (field.type === "triangle") {
-                    shapeObj = new Triangle({ ...common, width: field.width || 100, height: field.height || 100 })
-                }
-                if (shapeObj) staticCanvas.add(shapeObj)
-            } else {
-                // Text
-                let text = ""
-                if (field.type === "uuid") {
-                    text = certificateUuid.split("-")[0].toUpperCase()
-                } else if (field.type === "staticText") {
-                    text = field.text
-                } else {
-                    text = row[field.column] || ""
-                }
-                const originX = field.textAlign === "center" ? "center" : (field.textAlign === "right" ? "right" : "left")
-                const obj = new IText(text, {
-                    left: field.x, top: field.y,
-                    fontSize: field.fontSize,
-                    fill: field.color,
-                    fontFamily: field.fontFamily || "Arial",
-                    fontWeight: field.bold ? "bold" : "normal",
-                    fontStyle: field.italic ? "italic" : "normal",
-                    textAlign: field.textAlign,
-                    originX: originX,
-                    originY: "top",
-                    scaleX: field.scaleX || 1,
-                    scaleY: field.scaleY || 1,
-                    angle: field.rotation || 0
-                })
-                staticCanvas.add(obj)
+          if (field.type === 'image' && field.src) {
+            const img = await FabricImage.fromURL(field.src)
+            img.set({
+              left: field.x, top: field.y,
+              scaleX: (field.width || 100) / img.width,
+              scaleY: (field.height || 100) / img.height,
+              originX: 'left', originY: 'top'
+            })
+            staticCanvas.add(img)
+          } else if (field.type === 'qrcode') {
+            const qrDataUrl = await QRCode.toDataURL(verificationUrl, { width: field.size, margin: 1 })
+            const qrImg = await FabricImage.fromURL(qrDataUrl)
+            qrImg.set({
+              left: field.x, top: field.y,
+              scaleX: field.size / qrImg.width,
+              scaleY: field.size / qrImg.height,
+              originX: 'left', originY: 'top'
+            })
+            staticCanvas.add(qrImg)
+          } else if (["rect", "circle", "triangle"].includes(field.type)) {
+            const common = {
+              left: field.x, top: field.y,
+              fill: field.color || "#A098FF",
+              opacity: field.opacity ?? 1,
+              scaleX: field.scaleX || 1,
+              scaleY: field.scaleY || 1,
+              angle: field.rotation || 0,
+              originX: "left", originY: "top"
             }
+            let shapeObj;
+            if (field.type === "rect") {
+              shapeObj = new Rect({ ...common, width: field.width || 100, height: field.height || 100 })
+            } else if (field.type === "circle") {
+              shapeObj = new Circle({ ...common, radius: field.radius || ((field.width || 100) / 2) })
+            } else if (field.type === "triangle") {
+              shapeObj = new Triangle({ ...common, width: field.width || 100, height: field.height || 100 })
+            }
+            if (shapeObj) staticCanvas.add(shapeObj)
+          } else {
+            // Text
+            let text = ""
+            if (field.type === "uuid") {
+              text = certificateUuid.split("-")[0].toUpperCase()
+            } else if (field.type === "staticText") {
+              text = field.text
+            } else {
+              text = row[field.column] || ""
+            }
+            const originX = field.textAlign === "center" ? "center" : (field.textAlign === "right" ? "right" : "left")
+            const obj = new IText(text, {
+              left: field.x, top: field.y,
+              fontSize: field.fontSize,
+              fill: field.color,
+              fontFamily: field.fontFamily || "Arial",
+              fontWeight: field.bold ? "bold" : "normal",
+              fontStyle: field.italic ? "italic" : "normal",
+              textAlign: field.textAlign,
+              originX: originX,
+              originY: "top",
+              scaleX: field.scaleX || 1,
+              scaleY: field.scaleY || 1,
+              angle: field.rotation || 0
+            })
+            staticCanvas.add(obj)
+          }
         }
-        
+
         staticCanvas.renderAll()
         const imgData = canvasEl.toDataURL('image/png')
         printWindow.document.write(`<div class="certificate-page"><img src="${imgData}" /></div>`)
-        
+
         // Yield to UI thread occasionally
         if (idx % 5 === 0) await new Promise(r => setTimeout(r, 0))
       }
-      
+
       staticCanvas.dispose()
-      
+
       printWindow.document.write('</body></html>')
       printWindow.document.close()
-      
-    } catch(err) {
-        console.error(err)
-        toast.error('Failed to generate print preview')
+
+    } catch (err) {
+      console.error(err)
+      toast.error('Failed to generate print preview')
     } finally {
-        setSaving(false)
+      setSaving(false)
     }
   }
 
@@ -2161,22 +2163,22 @@ export default function Editor(){
     if (csvData.length === 0) { toast.error('Upload CSV data first'); return }
     try {
       const pdf = new jsPDF('l', 'px', [uploadedImage.width, uploadedImage.height])
-      
+
       // Use StaticCanvas for consistency with high resolution for PDF
       const multiplier = 2
       const canvasEl = document.createElement('canvas')
       canvasEl.width = uploadedImage.width * multiplier
       canvasEl.height = uploadedImage.height * multiplier
-      
+
       const staticCanvas = new StaticCanvas(canvasEl, {
-          width: uploadedImage.width * multiplier,
-          height: uploadedImage.height * multiplier,
-          backgroundVpt: false
+        width: uploadedImage.width * multiplier,
+        height: uploadedImage.height * multiplier,
+        backgroundVpt: false
       })
       staticCanvas.setZoom(multiplier)
-      
+
       const bg = new FabricImage(uploadedImage, {
-          originX: 'left', originY: 'top'
+        originX: 'left', originY: 'top'
       })
       staticCanvas.add(bg)
 
@@ -2184,12 +2186,12 @@ export default function Editor(){
         const row = csvData[idx]
         const email = row?.Email || row?.email || ''
         const name = row?.[csvColumns[0]] || ''
-        
-        let existingCert = certificates.find(c => 
-          (email && c.recipient_email === email) || 
+
+        let existingCert = certificates.find(c =>
+          (email && c.recipient_email === email) ||
           (name && c.recipient_name === name)
         )
-        
+
         let certificateUuid = existingCert?.certificate_uuid
         if (!certificateUuid) {
           certificateUuid = uuidv4()
@@ -2208,7 +2210,7 @@ export default function Editor(){
             })
           }
         }
-        
+
         const verificationUrl = `https://certifyflow.com/verify/${certificateUuid}`
 
         staticCanvas.clear()
@@ -2216,88 +2218,88 @@ export default function Editor(){
 
         // Draw all fields
         for (const field of textFields) {
-           if (field.type === 'image' && field.src) {
-               const img = await FabricImage.fromURL(field.src)
-               img.set({
-                   left: field.x, top: field.y,
-                   scaleX: (field.width || 100) / img.width,
-                   scaleY: (field.height || 100) / img.height,
-                   originX: 'left', originY: 'top'
-               })
-               staticCanvas.add(img)
-           } else if (field.type === 'qrcode') {
-               const qrDataUrl = await QRCode.toDataURL(verificationUrl, { width: field.size, margin: 1 })
-               const qrImg = await FabricImage.fromURL(qrDataUrl)
-               qrImg.set({
-                   left: field.x, top: field.y,
-                   scaleX: field.size / qrImg.width,
-                   scaleY: field.size / qrImg.height,
-                   originX: 'left', originY: 'top'
-               })
-               staticCanvas.add(qrImg)
-            } else if (["rect", "circle", "triangle"].includes(field.type)) {
-                const common = {
-                    left: field.x, top: field.y,
-                    fill: field.color || "#A098FF",
-                    opacity: field.opacity ?? 1,
-                    scaleX: field.scaleX || 1,
-                    scaleY: field.scaleY || 1,
-                    angle: field.rotation || 0,
-                    originX: "left", originY: "top"
-                }
-                let shapeObj;
-                if (field.type === "rect") {
-                    shapeObj = new Rect({ ...common, width: field.width || 100, height: field.height || 100 })
-                } else if (field.type === "circle") {
-                    shapeObj = new Circle({ ...common, radius: field.radius || ((field.width || 100) / 2) })
-                } else if (field.type === "triangle") {
-                    shapeObj = new Triangle({ ...common, width: field.width || 100, height: field.height || 100 })
-                }
-                if (shapeObj) staticCanvas.add(shapeObj)
-            } else {
-                // Text
-                let text = ""
-                if (field.type === "uuid") {
-                    text = certificateUuid.split("-")[0].toUpperCase()
-                } else if (field.type === "staticText") {
-                    text = field.text
-                } else {
-                    text = row[field.column] || ""
-                }
-                const originX = field.textAlign === "center" ? "center" : (field.textAlign === "right" ? "right" : "left")
-                const obj = new IText(text, {
-                    left: field.x, top: field.y,
-                    fontSize: field.fontSize,
-                    fill: field.color,
-                    fontFamily: field.fontFamily || "Arial",
-                    fontWeight: field.bold ? "bold" : "normal",
-                    fontStyle: field.italic ? "italic" : "normal",
-                    textAlign: field.textAlign,
-                    originX: originX,
-                    originY: "top",
-                    scaleX: field.scaleX || 1,
-                    scaleY: field.scaleY || 1,
-                    angle: field.rotation || 0
-                })
-                staticCanvas.add(obj)
+          if (field.type === 'image' && field.src) {
+            const img = await FabricImage.fromURL(field.src)
+            img.set({
+              left: field.x, top: field.y,
+              scaleX: (field.width || 100) / img.width,
+              scaleY: (field.height || 100) / img.height,
+              originX: 'left', originY: 'top'
+            })
+            staticCanvas.add(img)
+          } else if (field.type === 'qrcode') {
+            const qrDataUrl = await QRCode.toDataURL(verificationUrl, { width: field.size, margin: 1 })
+            const qrImg = await FabricImage.fromURL(qrDataUrl)
+            qrImg.set({
+              left: field.x, top: field.y,
+              scaleX: field.size / qrImg.width,
+              scaleY: field.size / qrImg.height,
+              originX: 'left', originY: 'top'
+            })
+            staticCanvas.add(qrImg)
+          } else if (["rect", "circle", "triangle"].includes(field.type)) {
+            const common = {
+              left: field.x, top: field.y,
+              fill: field.color || "#A098FF",
+              opacity: field.opacity ?? 1,
+              scaleX: field.scaleX || 1,
+              scaleY: field.scaleY || 1,
+              angle: field.rotation || 0,
+              originX: "left", originY: "top"
             }
+            let shapeObj;
+            if (field.type === "rect") {
+              shapeObj = new Rect({ ...common, width: field.width || 100, height: field.height || 100 })
+            } else if (field.type === "circle") {
+              shapeObj = new Circle({ ...common, radius: field.radius || ((field.width || 100) / 2) })
+            } else if (field.type === "triangle") {
+              shapeObj = new Triangle({ ...common, width: field.width || 100, height: field.height || 100 })
+            }
+            if (shapeObj) staticCanvas.add(shapeObj)
+          } else {
+            // Text
+            let text = ""
+            if (field.type === "uuid") {
+              text = certificateUuid.split("-")[0].toUpperCase()
+            } else if (field.type === "staticText") {
+              text = field.text
+            } else {
+              text = row[field.column] || ""
+            }
+            const originX = field.textAlign === "center" ? "center" : (field.textAlign === "right" ? "right" : "left")
+            const obj = new IText(text, {
+              left: field.x, top: field.y,
+              fontSize: field.fontSize,
+              fill: field.color,
+              fontFamily: field.fontFamily || "Arial",
+              fontWeight: field.bold ? "bold" : "normal",
+              fontStyle: field.italic ? "italic" : "normal",
+              textAlign: field.textAlign,
+              originX: originX,
+              originY: "top",
+              scaleX: field.scaleX || 1,
+              scaleY: field.scaleY || 1,
+              angle: field.rotation || 0
+            })
+            staticCanvas.add(obj)
+          }
         }
 
         staticCanvas.renderAll()
         const imgData = canvasEl.toDataURL('image/png')
-        
+
         if (idx > 0) pdf.addPage()
         pdf.addImage(imgData, 'PNG', 0, 0, uploadedImage.width, uploadedImage.height)
-        
+
         // Yield to UI thread
         if (idx % 5 === 0) await new Promise(r => setTimeout(r, 0))
       }
-      
+
       staticCanvas.dispose()
 
       pdf.save('certificates.pdf')
       toast.success('PDF exported')
-    } 
+    }
     catch (err) {
       console.error(err)
       toast.error('PDF export failed')
@@ -2306,13 +2308,13 @@ export default function Editor(){
 
 
 
-   const removeTextField = useCallback((id) => {
-     setTextFields(prev => {
-       const newFields = prev.filter(f => f.id !== id)
-       addToHistory(newFields)
-       return newFields
-     })
-   }, [addToHistory])
+  const removeTextField = useCallback((id) => {
+    setTextFields(prev => {
+      const newFields = prev.filter(f => f.id !== id)
+      addToHistory(newFields)
+      return newFields
+    })
+  }, [addToHistory])
 
   const updateTextField = useCallback((id, updates) => {
     setTextFields(fields => fields.map(f => f.id === id ? { ...f, ...updates } : f))
@@ -2321,7 +2323,7 @@ export default function Editor(){
   const addTextField = useCallback((columnName) => {
     const col = columnName || (csvColumns.length > 0 ? csvColumns[0] : null)
     if (!col && !columnName) return toast.error('Load CSV first')
-    
+
     const newId = Date.now()
     const newField = {
       id: newId,
@@ -2343,7 +2345,7 @@ export default function Editor(){
     })
     setSelectedFieldId(newId)
   }, [uploadedImage, csvColumns, addToHistory])
-  
+
   const addQRCode = useCallback(() => {
     const newId = Date.now()
     setTextFields(prev => {
@@ -2352,7 +2354,7 @@ export default function Editor(){
         toast.error('Only one QR code allowed per certificate')
         return prev
       }
-      
+
       const newField = {
         id: newId,
         type: 'qrcode',
@@ -2399,7 +2401,7 @@ export default function Editor(){
         toast.error('Only one UUID field allowed per certificate')
         return prev
       }
-      
+
       const newField = {
         id: newId,
         type: 'uuid',
@@ -2445,9 +2447,9 @@ export default function Editor(){
   const handleLogoUpload = useCallback(async (e) => {
     const file = e.target.files[0]
     if (!file) return
-    
+
     const toastId = toast.loading('Uploading asset...')
-    
+
     const reader = new FileReader()
     reader.onload = (ev) => {
       const img = new Image()
@@ -2472,14 +2474,14 @@ export default function Editor(){
           canvas.height = h
           const ctx = canvas.getContext('2d')
           ctx.drawImage(img, 0, 0, w, h)
-          
+
           // Convert to Blob for upload
           const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', 0.8))
-          
+
           // Upload to Supabase Storage
           const storagePath = `campaigns/${campaignId || 'unsaved'}/asset_${Date.now()}.webp`
           const { path, signedUrl } = await storageService.uploadAsset(blob, storagePath)
-          
+
           const newId = Date.now()
           const newField = {
             id: newId,
@@ -2491,7 +2493,7 @@ export default function Editor(){
             width: w / 2,
             height: h / 2
           }
-          
+
           setTextFields(prev => {
             const newFields = [...prev, newField]
             addToHistory(newFields)
@@ -2513,10 +2515,10 @@ export default function Editor(){
     fetch('/demo.csv')
       .then(res => res.text())
       .then(text => {
-        const rows = text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean)
-        
-        if(rows.length === 0) return
-        
+        const rows = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
+
+        if (rows.length === 0) return
+
         // Parse CSV with headers
         const headers = rows[0].split(',').map(h => h.replace(/^\uFEFF/, '').trim())
         const data = rows.slice(1).map(row => {
@@ -2527,15 +2529,15 @@ export default function Editor(){
           })
           return obj
         })
-        
+
         setCsvColumns(headers)
         setCsvData(data)
-        
+
         // Keep backward compatibility with names array
         const names = data.map(row => row[headers[0]] || '')
         setNames(names)
         setPreviewName(names[0])
-        
+
         toast.success('Demo CSV loaded')
       })
       .catch(err => console.error(err))
@@ -2559,70 +2561,70 @@ export default function Editor(){
         redo()
         return
       }
-      
+
       // Save: Ctrl+S
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-          e.preventDefault()
-          handleSaveWork()
-          return
+        e.preventDefault()
+        handleSaveWork()
+        return
       }
-      
+
       // Clone: Ctrl+D
       if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
-          e.preventDefault()
-          if (selectedFieldId) duplicateLayer(selectedFieldId)
-          return
+        e.preventDefault()
+        if (selectedFieldId) duplicateLayer(selectedFieldId)
+        return
       }
 
       // Space pan
       if (e.code === 'Space') {
-          if (!isSpacePressed) {
-              setIsSpacePressed(true)
-              document.body.style.cursor = 'grab'
-          }
-          // Prevent scrolling if not typing
-          e.preventDefault()
-          return
+        if (!isSpacePressed) {
+          setIsSpacePressed(true)
+          document.body.style.cursor = 'grab'
+        }
+        // Prevent scrolling if not typing
+        e.preventDefault()
+        return
       }
 
       // Delete
       if (e.key === 'Delete' || e.key === 'Backspace') {
         if (selectedFieldId) {
-            e.preventDefault()
-            removeTextField(selectedFieldId)
-            setSelectedFieldId(null)
+          e.preventDefault()
+          removeTextField(selectedFieldId)
+          setSelectedFieldId(null)
         }
       }
 
       // Initializing nudge amount
-      const nudge = e.shiftKey ? 10 : 1 
+      const nudge = e.shiftKey ? 10 : 1
       if (!selectedFieldId) return
 
       // Arrows
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
         e.preventDefault()
         const canvas = fabricRef.current
-        
+
         if (!selectedFieldId || !canvas) return
-        
+
         // CRITICAL: Block sync effect from overriding our changes
         isModifying.current = true
-        
+
         const obj = canvas.getObjects().find(o => String(o.id) === String(selectedFieldId))
         if (!obj) return
-        
+
         let newX = obj.left
         let newY = obj.top
-        
+
         if (e.key === 'ArrowUp') newY -= nudge
         if (e.key === 'ArrowDown') newY += nudge
         if (e.key === 'ArrowLeft') newX -= nudge
         if (e.key === 'ArrowRight') newX += nudge
-        
+
         obj.set({ left: newX, top: newY })
         obj.setCoords()
         canvas.requestRenderAll()
-        
+
         if (arrowKeyHistoryTimeout.current) clearTimeout(arrowKeyHistoryTimeout.current)
 
         arrowKeyHistoryTimeout.current = setTimeout(() => {
@@ -2637,10 +2639,10 @@ export default function Editor(){
     }
 
     const handleKeyUp = (e) => {
-        if (e.code === 'Space') {
-            setIsSpacePressed(false)
-            document.body.style.cursor = 'default'
-        }
+      if (e.code === 'Space') {
+        setIsSpacePressed(false)
+        document.body.style.cursor = 'default'
+      }
     }
 
     const abortController = new AbortController()
@@ -2662,7 +2664,7 @@ export default function Editor(){
   return (
     <div className="h-screen bg-background text-foreground no-scrollbar">
 
-      <Toolbar 
+      <Toolbar
         campaignName={campaignName}
         hasUnsavedChanges={hasUnsavedChanges}
         isSavingWork={isSavingWork}
@@ -2686,7 +2688,7 @@ export default function Editor(){
 
       {/* Main Editor Layout */}
       <div className="h-screen relative overflow-hidden bg-transparent">
-        <EditorCanvas 
+        <EditorCanvas
           uploadedImage={uploadedImage}
           canvasPan={canvasPan}
           zoomLevel={zoomLevel}
@@ -2697,7 +2699,7 @@ export default function Editor(){
           canvasRef={canvasRef}
         />
 
-        <SidebarLeft 
+        <SidebarLeft
           leftSidebarOpen={leftSidebarOpen}
           dbTemplates={dbTemplates}
           isFetchingTemplates={isFetchingTemplates}
@@ -2728,7 +2730,7 @@ export default function Editor(){
           isTemplateMode={isTemplateMode}
         />
 
-        <PropertiesPanel 
+        <PropertiesPanel
           rightSidebarOpen={rightSidebarOpen}
           textFields={textFields}
           selectedFieldId={selectedFieldId}
@@ -2753,7 +2755,7 @@ export default function Editor(){
           isTemplateMode={isTemplateMode}
         />
 
-        <HistoryBar 
+        <HistoryBar
           undo={undo}
           redo={redo}
           historyStep={historyStep}
@@ -2772,7 +2774,7 @@ export default function Editor(){
 
       {showShortcuts && <ShortcutsModal setShowShortcuts={setShowShortcuts} />}
 
-      <UnsavedDialog 
+      <UnsavedDialog
         showUnsavedDialog={showUnsavedDialog}
         setShowUnsavedDialog={setShowUnsavedDialog}
         isSavingWork={isSavingWork}
@@ -2780,14 +2782,14 @@ export default function Editor(){
         handleSaveWork={handleSaveWork}
       />
 
-      <EmailTemplateModal 
+      <EmailTemplateModal
         isOpen={isEmailModalOpen}
         onClose={() => setIsEmailModalOpen(false)}
         campaignName={campaignName}
         onSend={sendCertificatesViaEmail}
       />
 
-      <EmailBatchModal 
+      <EmailBatchModal
         isOpen={batchModalOpen}
         onClose={() => setBatchModalOpen(false)}
         progress={batchProgress}

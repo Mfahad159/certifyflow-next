@@ -1,13 +1,14 @@
-import { useRouter } from 'next/navigation';
-
-import { 
-  LogOut, 
-  User, 
-  ChevronDown, 
-  Settings, 
-  Plus, 
-  Moon, 
-  Sun, 
+"use client";
+import React, { useState, useEffect, useRef } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
+import {
+  LogOut,
+  User,
+  ChevronDown,
+  Settings,
+  Plus,
+  Moon,
+  Sun,
   ArrowLeft,
   LayoutDashboard,
   FileText,
@@ -20,18 +21,18 @@ import {
   CreditCard
 } from 'lucide-react'
 
-export default function DashboardSidebar({ 
-  user, 
-  theme, 
-  toggleTheme, 
-  handleLogout, 
+export default function DashboardSidebar({
+  user,
+  theme,
+  toggleTheme,
+  handleLogout,
   handleNewCampaign,
   currentPage = 'dashboard',
   showBackButton = false,
   backButtonPath = '/dashboard'
 }) {
   const navigate = useRouter()
-  const location = useLocation()
+  const pathname = usePathname()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const dropdownRef = useRef(null)
@@ -50,7 +51,7 @@ export default function DashboardSidebar({
       const sidebarRect = sidebarRef.current.getBoundingClientRect()
       const logoRect = logoRef.current.getBoundingClientRect()
       const navRect = navContainerRef.current.getBoundingClientRect()
-      
+
       console.log('🔍 Sidebar State + DOM Measurements:', {
         isExpanded,
         sidebarWidth: `${sidebarRect.width}px`,
@@ -96,7 +97,7 @@ export default function DashboardSidebar({
   ]
 
   return (
-    <aside 
+    <aside
       ref={sidebarRef}
       className={`fixed left-0 top-0 bottom-0 z-50 bg-background flex flex-col transition-all duration-500 ease-in-out ${isExpanded ? 'w-64' : 'w-20'}`}
       onMouseEnter={() => setIsExpanded(true)}
@@ -104,17 +105,16 @@ export default function DashboardSidebar({
     >
       {/* Logo Section - Fixed Height */}
       <div ref={logoRef} className="h-20 flex items-center px-5 flex-shrink-0">
-        <div 
+        <div
           className="flex items-center gap-3 cursor-pointer w-full overflow-hidden"
-          onClick={() => navigate.push('/dashboard')}
+          onClick={() => navigate('/dashboard')}
         >
           <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
             <img src="/assest/logo.svg" alt="logo" className="h-6 w-6" />
           </div>
-          <span 
-            className={`text-base font-serif font-bold text-foreground whitespace-nowrap transition-all duration-500 ${
-              isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'
-            }`}
+          <span
+            className={`text-base font-serif font-bold text-foreground whitespace-nowrap transition-all duration-500 ${isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'
+              }`}
           >
             CertifyFlow
           </span>
@@ -129,21 +129,19 @@ export default function DashboardSidebar({
             {mainNavItems.map((item) => (
               <div key={item.id}>
                 <button
-                  onClick={() => navigate.push(item.path)}
-                  className={`relative flex items-center gap-3 w-full min-h-[44px] font-medium text-[13px] cursor-pointer group transition-all duration-500 ease-in-out overflow-hidden rounded-xl ${
-                    currentPage === item.id 
-                      ? 'bg-accent/10 text-accent' 
+                  onClick={() => navigate(item.path)}
+                  className={`relative flex items-center gap-3 w-full min-h-[44px] font-medium text-[13px] cursor-pointer group transition-all duration-500 ease-in-out overflow-hidden rounded-xl ${currentPage === item.id
+                      ? 'bg-accent/10 text-accent'
                       : 'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
-                  }`}
+                    }`}
                   title={!isExpanded ? item.label : ''}
                 >
                   <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center">
                     <item.icon size={18} className="transition-colors duration-500" />
                   </div>
-                  <span 
-                    className={`whitespace-nowrap transition-all duration-500 ${
-                      isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 absolute left-10 ml-3'
-                    }`}
+                  <span
+                    className={`whitespace-nowrap transition-all duration-500 ${isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 absolute left-10 ml-3'
+                      }`}
                   >
                     {item.label}
                   </span>
@@ -159,21 +157,19 @@ export default function DashboardSidebar({
             {insightNavItems.map((item) => (
               <div key={item.id}>
                 <button
-                  onClick={() => navigate.push(item.path)}
-                  className={`relative flex items-center gap-3 w-full min-h-[44px] font-medium text-[13px] cursor-pointer group transition-all duration-500 ease-in-out overflow-hidden rounded-xl ${
-                    currentPage === item.id 
-                      ? 'bg-accent/10 text-accent' 
+                  onClick={() => navigate(item.path)}
+                  className={`relative flex items-center gap-3 w-full min-h-[44px] font-medium text-[13px] cursor-pointer group transition-all duration-500 ease-in-out overflow-hidden rounded-xl ${currentPage === item.id
+                      ? 'bg-accent/10 text-accent'
                       : 'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
-                  }`}
+                    }`}
                   title={!isExpanded ? item.label : ''}
                 >
                   <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center">
                     <item.icon size={18} className="transition-colors duration-500" />
                   </div>
-                  <span 
-                    className={`whitespace-nowrap transition-all duration-500 ${
-                      isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 absolute left-10 ml-3'
-                    }`}
+                  <span
+                    className={`whitespace-nowrap transition-all duration-500 ${isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 absolute left-10 ml-3'
+                      }`}
                   >
                     {item.label}
                   </span>
@@ -197,21 +193,19 @@ export default function DashboardSidebar({
                 <User size={16} className="text-accent" />
               </div>
             </div>
-            
-            <div className={`flex-1 flex items-center justify-between min-w-0 transition-all duration-500 ${
-              isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'
-            }`}>
+
+            <div className={`flex-1 flex items-center justify-between min-w-0 transition-all duration-500 ${isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'
+              }`}>
               <div className="flex-1 text-left min-w-0 ml-2">
                 <p className="text-[13px] font-medium text-foreground truncate">
                   {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}
                 </p>
                 <p className="text-[11px] text-muted-foreground truncate">{user?.email}</p>
               </div>
-              <ChevronDown 
-                size={14} 
-                className={`text-muted-foreground transition-transform duration-200 flex-shrink-0 ${
-                  isDropdownOpen ? 'rotate-180' : ''
-                }`}
+              <ChevronDown
+                size={14}
+                className={`text-muted-foreground transition-transform duration-200 flex-shrink-0 ${isDropdownOpen ? 'rotate-180' : ''
+                  }`}
               />
             </div>
           </button>
@@ -221,7 +215,7 @@ export default function DashboardSidebar({
             <div className="absolute bottom-full left-0 right-0 mb-2 bg-background border border-border rounded-xl shadow-lg overflow-hidden">
               <button
                 onClick={() => {
-                  navigate.push('/dashboard/settings')
+                  navigate('/dashboard/settings')
                   setIsDropdownOpen(false)
                 }}
                 className="w-full flex items-center gap-3 px-4 py-3 hover:bg-foreground/5 transition-colors text-left"

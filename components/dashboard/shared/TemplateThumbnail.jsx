@@ -1,9 +1,10 @@
+"use client";
 import React from 'react'
 
 export const getTemplatePreviewHtml = (template, isThumbnail = false) => {
-  const isJson = template.template_data && 
-                 template.template_data.textFields && 
-                 template.template_data.textFields.length > 0
+  const isJson = template.template_data &&
+    template.template_data.textFields &&
+    template.template_data.textFields.length > 0
 
   if (isJson) {
     const bgColor = template.template_data.background_color || '#FFFFFF';
@@ -89,7 +90,7 @@ export const getTemplatePreviewHtml = (template, isThumbnail = false) => {
       </html>
     `
   }
-  
+
   // High-fidelity fallback if HTML/CSS provided in JSON
   const html = template.template_data?.html_content || template.html_content || ''
   const css = template.template_data?.css_content || template.css_content || ''
@@ -112,10 +113,10 @@ export const getTemplatePreviewHtml = (template, isThumbnail = false) => {
 }
 
 export default function TemplateThumbnail({ template, className = "" }) {
-  const isJson = template.template_data && 
-                 template.template_data.textFields && 
-                 template.template_data.textFields.length > 0
-  
+  const isJson = template.template_data &&
+    template.template_data.textFields &&
+    template.template_data.textFields.length > 0
+
   const hasThumbnail = template.thumbnail_url || template.thumbnail
 
   if (hasThumbnail && !isJson) {

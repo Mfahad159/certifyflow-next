@@ -1,13 +1,12 @@
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { LogOut, User, ChevronDown, Settings } from 'lucide-react';
 import { supabase, signInWithGoogle, signOut } from '@/lib/supabase';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
-
 export default function Navbar() {
   const navigate = useRouter();
-  const location = useLocation();
+  const pathname = usePathname();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -62,10 +61,10 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 pt-8 px-6 pointer-events-none">
       <div className="max-w-7xl mx-auto relative flex items-center justify-between gap-4">
-        
+
         {/* Left - Logo */}
-        <div 
-          className="pointer-events-auto flex items-center gap-3 bg-secondary/50 dark:bg-background/10 backdrop-blur-2xl px-3 py-2.5 rounded-[32px] border border-border cursor-pointer transition-all hover:bg-background/20" 
+        <div
+          className="pointer-events-auto flex items-center gap-3 bg-secondary/50 dark:bg-background/10 backdrop-blur-2xl px-3 py-2.5 rounded-[32px] border border-border cursor-pointer transition-all hover:bg-background/20"
           onClick={() => navigate.push('/')}
         >
           <img src="/assest/logo.svg" alt="logo" className="h-7 w-7" />
@@ -75,53 +74,48 @@ export default function Navbar() {
         {/* Center - Navigation Links Pill (Absolutely Centered) */}
         <div className="absolute left-1/2 -translate-x-1/2 hidden md:block">
           <div className="flex items-center gap-2 px-4 py-2.5 rounded-[32px] bg-secondary/50 dark:bg-background/10 backdrop-blur-2xl border border-border pointer-events-auto">
-            <button 
+            <button
               onClick={() => navigate.push('/')}
-              className={`text-[12px] font-bold transition-all px-3 py-2 rounded-full cursor-pointer ${
-                location.pathname === '/' 
-                  ? 'text-white bg-accent' 
-                  : 'text-muted-foreground hover:text-foreground dark:hover:text-white hover:bg-foreground/5'
-              }`}
+              className={`text-[12px] font-bold transition-all px-3 py-2 rounded-full cursor-pointer ${pathname === '/'
+                ? 'text-white bg-accent'
+                : 'text-muted-foreground hover:text-foreground dark:hover:text-white hover:bg-foreground/5'
+                }`}
             >
               Home
             </button>
-            <button 
+            <button
               onClick={() => navigate.push('/features')}
-              className={`text-[12px] font-bold transition-all px-3 py-2 rounded-full cursor-pointer ${
-                location.pathname === '/features' 
-                  ? 'text-white bg-accent' 
-                  : 'text-muted-foreground hover:text-foreground dark:hover:text-white hover:bg-foreground/5'
-              }`}
+              className={`text-[12px] font-bold transition-all px-3 py-2 rounded-full cursor-pointer ${pathname === '/features'
+                ? 'text-white bg-accent'
+                : 'text-muted-foreground hover:text-foreground dark:hover:text-white hover:bg-foreground/5'
+                }`}
             >
               Features
             </button>
-            <button 
+            <button
               onClick={() => navigate.push('/templates')}
-              className={`text-[12px] font-bold transition-all px-3 py-2 rounded-full cursor-pointer ${
-                location.pathname === '/templates' 
-                  ? 'text-white bg-accent' 
-                  : 'text-muted-foreground hover:text-foreground dark:hover:text-white hover:bg-foreground/5'
-              }`}
+              className={`text-[12px] font-bold transition-all px-3 py-2 rounded-full cursor-pointer ${pathname === '/templates'
+                ? 'text-white bg-accent'
+                : 'text-muted-foreground hover:text-foreground dark:hover:text-white hover:bg-foreground/5'
+                }`}
             >
               Templates
             </button>
-            <button 
+            <button
               onClick={() => navigate.push('/pricing')}
-              className={`text-[12px] font-bold transition-all px-3 py-2 rounded-full cursor-pointer ${
-                location.pathname === '/pricing' 
-                  ? 'text-white bg-accent' 
-                  : 'text-muted-foreground hover:text-foreground dark:hover:text-white hover:bg-foreground/5'
-              }`}
+              className={`text-[12px] font-bold transition-all px-3 py-2 rounded-full cursor-pointer ${pathname === '/pricing'
+                ? 'text-white bg-accent'
+                : 'text-muted-foreground hover:text-foreground dark:hover:text-white hover:bg-foreground/5'
+                }`}
             >
               Pricing
             </button>
-            <button 
+            <button
               onClick={() => navigate.push('/verify')}
-              className={`text-[12px] font-bold transition-all px-3 py-2 rounded-full cursor-pointer ${
-                location.pathname.startsWith('/verify') 
-                  ? 'text-white bg-accent' 
-                  : 'text-muted-foreground hover:text-foreground dark:hover:text-white hover:bg-foreground/5'
-              }`}
+              className={`text-[12px] font-bold transition-all px-3 py-2 rounded-full cursor-pointer ${pathname.startsWith('/verify')
+                ? 'text-white bg-accent'
+                : 'text-muted-foreground hover:text-foreground dark:hover:text-white hover:bg-foreground/5'
+                }`}
             >
               Verify
             </button>
@@ -181,7 +175,7 @@ export default function Navbar() {
                           <p className="text-[12px] text-muted-foreground font-medium">View and edit your profile</p>
                         </div>
                       </button>
-                      
+
                       <button
                         onClick={() => {
                           navigate.push('/dashboard/settings');
@@ -220,7 +214,7 @@ export default function Navbar() {
                 )}
               </div>
 
-              <button 
+              <button
                 onClick={() => navigate.push('/dashboard')}
                 className="bg-accent text-white px-6 py-2.5 rounded-full text-[12px] font-bold hover:bg-lavender-600 transition-all duration-300 active:scale-95 flex items-center gap-2 cursor-pointer"
               >
@@ -229,13 +223,13 @@ export default function Navbar() {
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <button 
+              <button
                 onClick={handleLogin}
                 className="text-[12px] font-bold text-muted-foreground hover:text-foreground dark:hover:text-white px-4 py-2 transition-all cursor-pointer rounded-full hover:bg-foreground/5"
               >
                 Log In
               </button>
-              <button 
+              <button
                 onClick={handleLogin}
                 className="bg-accent text-white px-6 py-2.5 rounded-full text-[12px] font-bold hover:bg-lavender-600 transition-all duration-300 active:scale-95 cursor-pointer shadow-xl shadow-accent/10"
               >
