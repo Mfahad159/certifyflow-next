@@ -1,9 +1,42 @@
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Upload,
+  FileText,
+  X,
+  FileOutput,
+  Send,
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  Check
+} from 'lucide-react';
+import { toast } from 'sonner';
 
-import { templates } from '@/lib/templates'
-import { ChevronLeft, ChevronRight, Check } from 'lucide-react'
-import { toast } from 'sonner'
-import TemplateThumbnail from '../shared/TemplateThumbnail'
+import { templates } from '@/lib/templates';
+import { templateService } from '@/lib/templateService';
+import { campaignService } from '@/lib/campaignService.client';
+import TemplateThumbnail from '../shared/TemplateThumbnail';
 
 export default function CampaignModal({ isOpen, onClose, campaignType, userId }) {
   const navigate = useRouter()
@@ -38,7 +71,7 @@ export default function CampaignModal({ isOpen, onClose, campaignType, userId })
       ])
       setPublicTemplates(pubTemplates)
       setPrivateTemplates(privTemplates)
-      
+
       // Default selection
       if (pubTemplates.length > 0) {
         setSelectedTemplate({ id: pubTemplates[0].id, type: 'public' })
@@ -74,7 +107,7 @@ export default function CampaignModal({ isOpen, onClose, campaignType, userId })
   const parseCSV = (text) => {
     const lines = text.split('\n').filter(line => line.trim())
     if (lines.length < 2) return null
-    
+
     const headers = lines[0].split(',').map(h => h.trim().toLowerCase())
     const data = lines.slice(1).map(line => {
       const values = line.split(',').map(v => v.trim())
@@ -83,7 +116,7 @@ export default function CampaignModal({ isOpen, onClose, campaignType, userId })
         return obj
       }, {})
     })
-    
+
     return { headers, data }
   }
 
@@ -91,11 +124,11 @@ export default function CampaignModal({ isOpen, onClose, campaignType, userId })
     const headers = csvData.headers
     const hasName = headers.some(h => h.toLowerCase() === 'name')
     const hasEmail = headers.some(h => h.toLowerCase() === 'email')
-    
+
     const missingColumns = []
     if (!hasName) missingColumns.push('name')
     if (!hasEmail) missingColumns.push('email')
-    
+
     return {
       isValid: missingColumns.length === 0,
       missingColumns
@@ -115,7 +148,7 @@ export default function CampaignModal({ isOpen, onClose, campaignType, userId })
       // Read and parse CSV
       const text = await csvFile.text()
       const csvData = parseCSV(text)
-      
+
       if (!csvData) {
         toast.error('Invalid CSV format')
         setIsLoading(false)
@@ -156,7 +189,7 @@ export default function CampaignModal({ isOpen, onClose, campaignType, userId })
       const campaign = await campaignService.createCampaign(campaignData)
 
       // Navigate to generate page with campaign data
-      navigate.push(`/dashboard/edit/${campaign.id}`, { state: { campaign } })
+      navigate.push(`/dashboard/edit/${campaign.id}`)
 
       // Reset and close
       handleClose()
@@ -212,11 +245,10 @@ export default function CampaignModal({ isOpen, onClose, campaignType, userId })
               <DialogTitle className="text-xl font-bold font-serif">Create Campaign</DialogTitle>
               <div className="flex gap-1.5 mr-8">
                 {[1, 2].map((i) => (
-                  <div 
-                    key={i} 
-                    className={`h-1.5 rounded-full transition-all duration-300 ${
-                      step === i ? 'w-6 bg-accent' : 'w-2 bg-secondary'
-                    }`} 
+                  <div
+                    key={i}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${step === i ? 'w-6 bg-accent' : 'w-2 bg-secondary'
+                      }`}
                   />
                 ))}
               </div>
@@ -244,13 +276,12 @@ export default function CampaignModal({ isOpen, onClose, campaignType, userId })
                   <div className="space-y-3">
                     <label className="text-xs font-bold text-muted-foreground">Campaign Mode</label>
                     <div className="grid grid-cols-2 gap-3">
-                      <button 
+                      <button
                         onClick={() => setSelectedMode('generate_only')}
-                        className={`flex items-center gap-3 p-4 rounded-2xl border text-left transition-all ${
-                          selectedMode === 'generate_only' 
-                            ? 'bg-accent/10 border-accent ring-1 ring-accent' 
+                        className={`flex items-center gap-3 p-4 rounded-2xl border text-left transition-all ${selectedMode === 'generate_only'
+                            ? 'bg-accent/10 border-accent ring-1 ring-accent'
                             : 'bg-background hover:bg-secondary/50 border-border'
-                        }`}
+                          }`}
                       >
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${selectedMode === 'generate_only' ? 'bg-accent text-white' : 'bg-secondary text-muted-foreground'}`}>
                           <FileOutput size={18} />
@@ -261,13 +292,12 @@ export default function CampaignModal({ isOpen, onClose, campaignType, userId })
                         </div>
                       </button>
 
-                      <button 
+                      <button
                         onClick={() => setSelectedMode('generate_send')}
-                        className={`flex items-center gap-3 p-4 rounded-2xl border text-left transition-all ${
-                          selectedMode === 'generate_send' 
-                            ? 'bg-accent/10 border-accent ring-1 ring-accent' 
+                        className={`flex items-center gap-3 p-4 rounded-2xl border text-left transition-all ${selectedMode === 'generate_send'
+                            ? 'bg-accent/10 border-accent ring-1 ring-accent'
                             : 'bg-background hover:bg-secondary/50 border-border'
-                        }`}
+                          }`}
                       >
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${selectedMode === 'generate_send' ? 'bg-accent text-white' : 'bg-secondary text-muted-foreground'}`}>
                           <Send size={18} />
@@ -284,33 +314,33 @@ export default function CampaignModal({ isOpen, onClose, campaignType, userId })
                     <div className="flex justify-between items-center">
                       <label className="text-xs font-bold text-muted-foreground">Design Template</label>
                       <div className="flex gap-2">
-                        <Button variant="ghost" size="icon" onClick={() => scrollCarousel('left')} className="h-6 w-6 rounded-full border">
+                        <Button variant="ghost" size="icon" onClick={() => scrollCarousel('left')} className="h-6 w-6 rounded-full border border-border">
                           <ChevronLeft size={14} />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => scrollCarousel('right')} className="h-6 w-6 rounded-full border">
+                        <Button variant="ghost" size="icon" onClick={() => scrollCarousel('right')} className="h-6 w-6 rounded-full border border-border">
                           <ChevronRight size={14} />
                         </Button>
                       </div>
                     </div>
-                    
-                    <div 
+
+                    <div
                       ref={carouselRef}
                       className="flex overflow-x-auto gap-4 py-2 no-scrollbar snap-x snap-mandatory"
                     >
                       {/* Public Templates */}
                       {publicTemplates.map((tpl) => (
-                        <button 
+                        <button
                           key={`pub-${tpl.id}`}
                           onClick={() => setSelectedTemplate({ id: tpl.id, type: 'public' })}
                           className="shrink-0 w-40 snap-start rounded-2xl overflow-hidden border border-border transition-all hover:border-accent/30"
                         >
-                          <div className="aspect-[1.4/1] relative bg-zinc-900 border-b overflow-hidden pointer-events-none select-none">
+                          <div className="aspect-[1.4/1] relative bg-zinc-900 border-b border-border overflow-hidden pointer-events-none select-none">
                             <TemplateThumbnail template={tpl} />
                             {selectedTemplate.id === tpl.id && selectedTemplate.type === 'public' && (
                               <div className="absolute top-2.5 right-2.5 z-10">
-                                 <div className="bg-accent text-white rounded-full p-1.5 shadow-xl ring-2 ring-white dark:ring-zinc-950">
-                                    <Check size={10} strokeWidth={4} />
-                                 </div>
+                                <div className="bg-accent text-white rounded-full p-1.5 shadow-xl ring-2 ring-white dark:ring-zinc-950">
+                                  <Check size={10} strokeWidth={4} />
+                                </div>
                               </div>
                             )}
                           </div>
@@ -325,18 +355,18 @@ export default function CampaignModal({ isOpen, onClose, campaignType, userId })
 
                       {/* Private Templates */}
                       {privateTemplates.map((tpl) => (
-                        <button 
+                        <button
                           key={`priv-${tpl.id}`}
                           onClick={() => setSelectedTemplate({ id: tpl.id, type: 'private' })}
                           className="shrink-0 w-40 snap-start rounded-2xl overflow-hidden border border-border transition-all hover:border-accent/30"
                         >
-                          <div className="aspect-[1.4/1] relative bg-zinc-900 border-b overflow-hidden pointer-events-none select-none">
+                          <div className="aspect-[1.4/1] relative bg-zinc-900 border-b border-border overflow-hidden pointer-events-none select-none">
                             <TemplateThumbnail template={tpl} />
                             {selectedTemplate.id === tpl.id && selectedTemplate.type === 'private' && (
                               <div className="absolute top-2.5 right-2.5 z-10">
-                                 <div className="bg-accent text-white rounded-full p-1.5 shadow-xl ring-2 ring-white dark:ring-zinc-950">
-                                    <Check size={10} strokeWidth={4} />
-                                 </div>
+                                <div className="bg-accent text-white rounded-full p-1.5 shadow-xl ring-2 ring-white dark:ring-zinc-950">
+                                  <Check size={10} strokeWidth={4} />
+                                </div>
                               </div>
                             )}
                           </div>
@@ -363,7 +393,7 @@ export default function CampaignModal({ isOpen, onClose, campaignType, userId })
                           <p className="font-bold text-base text-foreground">Click to upload Recipient CSV</p>
                           <p className="text-xs text-muted-foreground mt-1">Upload a file containing names and email addresses</p>
                         </div>
-                        <Input
+                        <input
                           type="file"
                           className="hidden"
                           accept=".csv"
@@ -389,7 +419,7 @@ export default function CampaignModal({ isOpen, onClose, campaignType, userId })
             </div>
           </div>
 
-          <DialogFooter className="p-6 pt-4 border-t flex flex-row items-center sm:justify-between">
+          <DialogFooter className="p-6 pt-4 border-t border-border flex flex-row items-center sm:justify-between">
             <Button variant="ghost" onClick={() => step === 2 ? setStep(1) : setShowCancelAlert(true)} disabled={isLoading} className="rounded-xl">
               {step === 2 ? 'Back' : 'Cancel'}
             </Button>
@@ -411,17 +441,17 @@ export default function CampaignModal({ isOpen, onClose, campaignType, userId })
         <AlertDialogContent className="rounded-[40px] border-border bg-background/95 backdrop-blur-xl p-10 max-w-md">
           <AlertDialogHeader className="space-y-4">
             <div className="w-16 h-16 rounded-[24px] bg-accent/10 flex items-center justify-center mx-auto sm:mx-0">
-               <Send className="text-accent" size={32} />
+              <Send className="text-accent" size={32} />
             </div>
             <div className="text-center sm:text-left">
               <AlertDialogTitle className="text-2xl font-serif font-bold">Launch Campaign?</AlertDialogTitle>
-              <AlertDialogDescription className="text-sm mt-2">
+              <AlertDialogDescription className="text-sm mt-2 text-muted-foreground">
                 You are about to initialize "{campaignName}". This will process your recipients and prepare certificates.
               </AlertDialogDescription>
             </div>
           </AlertDialogHeader>
-          <AlertDialogFooter className="mt-8 gap-3 sm:gap-0">
-            <AlertDialogCancel className="rounded-full px-8 py-6 text-xs font-bold">Review</AlertDialogCancel>
+          <AlertDialogFooter className="mt-8 gap-3 sm:gap-2">
+            <AlertDialogCancel className="rounded-full px-8 py-6 text-xs font-bold border-border">Review</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 setShowCreateAlert(false);
@@ -439,17 +469,17 @@ export default function CampaignModal({ isOpen, onClose, campaignType, userId })
         <AlertDialogContent className="rounded-[40px] border-border bg-background/95 backdrop-blur-xl p-10 max-w-md">
           <AlertDialogHeader className="space-y-4">
             <div className="w-16 h-16 rounded-[24px] bg-red-500/10 flex items-center justify-center mx-auto sm:mx-0">
-               <X className="text-red-500" size={32} />
+              <X className="text-red-500" size={32} />
             </div>
             <div className="text-center sm:text-left">
               <AlertDialogTitle className="text-2xl font-serif font-bold">Discard Changes?</AlertDialogTitle>
-              <AlertDialogDescription className="text-sm mt-2">
+              <AlertDialogDescription className="text-sm mt-2 text-muted-foreground">
                 Are you sure you want to stop? All progress in this configuration will be permanently lost.
               </AlertDialogDescription>
             </div>
           </AlertDialogHeader>
-          <AlertDialogFooter className="mt-8 gap-3 sm:gap-0">
-            <AlertDialogCancel className="rounded-full px-8 py-6 text-xs font-bold">Keep Editing</AlertDialogCancel>
+          <AlertDialogFooter className="mt-8 gap-3 sm:gap-2">
+            <AlertDialogCancel className="rounded-full px-8 py-6 text-xs font-bold border-border">Keep Editing</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 setShowCancelAlert(false);
@@ -467,22 +497,22 @@ export default function CampaignModal({ isOpen, onClose, campaignType, userId })
         <AlertDialogContent className="rounded-[40px] border-border bg-background/95 backdrop-blur-xl p-10 max-w-md">
           <AlertDialogHeader className="space-y-4">
             <div className="w-16 h-16 rounded-[24px] bg-amber-500/10 flex items-center justify-center mx-auto sm:mx-0">
-               <FileText className="text-amber-500" size={32} />
+              <FileText className="text-amber-500" size={32} />
             </div>
             <div className="text-center sm:text-left">
               <AlertDialogTitle className="text-2xl font-serif font-bold">Data Warning</AlertDialogTitle>
-              <AlertDialogDescription className="text-sm mt-2">
+              <AlertDialogDescription className="text-sm mt-2 text-muted-foreground">
                 {validationWarning}
               </AlertDialogDescription>
             </div>
           </AlertDialogHeader>
-          <AlertDialogFooter className="mt-8 gap-3 sm:gap-0">
-            <AlertDialogCancel 
+          <AlertDialogFooter className="mt-8 gap-3 sm:gap-2">
+            <AlertDialogCancel
               onClick={() => {
                 setShowValidationAlert(false);
                 setPendingCsvData(null);
               }}
-              className="rounded-full px-8 py-6 text-xs font-bold uppercase tracking-widest"
+              className="rounded-full px-8 py-6 text-xs font-bold uppercase tracking-widest border-border"
             >
               Fix File
             </AlertDialogCancel>

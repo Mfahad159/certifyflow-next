@@ -4,7 +4,7 @@ import { useRouter, usePathname, useParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { ArrowLeft, Check, X, Mail, User, FileText, LogOut, Download } from 'lucide-react'
 import { supabase, signOut } from '@/lib/supabaseClient'
-import { campaignService } from '@/lib/campaignService'
+import { campaignService } from '@/lib/campaignService.client'
 import ThemeToggle from '../../ui/theme-toggle'
 import { Input } from '../../ui/input'
 import { Loader } from '../../ui/loader'
@@ -291,8 +291,8 @@ export default function CampaignManage() {
               <button
                 onClick={() => setFilterStatus('all')}
                 className={`px-6 py-2.5 rounded-full text-[12px] font-bold transition-all ${filterStatus === 'all'
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
                   }`}
               >
                 All
@@ -300,8 +300,8 @@ export default function CampaignManage() {
               <button
                 onClick={() => setFilterStatus('sent')}
                 className={`px-6 py-2.5 rounded-full text-[12px] font-bold transition-all ${filterStatus === 'sent'
-                    ? 'bg-background text-accent shadow-sm'
-                    : 'text-muted-foreground hover:text-accent'
+                  ? 'bg-background text-accent shadow-sm'
+                  : 'text-muted-foreground hover:text-accent'
                   }`}
               >
                 Sent
@@ -309,8 +309,8 @@ export default function CampaignManage() {
               <button
                 onClick={() => setFilterStatus('pending')}
                 className={`px-6 py-2.5 rounded-full text-[12px] font-bold transition-all ${filterStatus === 'pending'
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
                   }`}
               >
                 Pending
@@ -365,8 +365,8 @@ export default function CampaignManage() {
                       ))}
                       <td className="py-6 px-6 text-center">
                         <div className={`inline-flex items-center px-3 py-1.5 rounded-full text-[8px] font-bold backdrop-blur-md ${recipient.status === 'sent'
-                            ? 'bg-green-500/10 text-green-500 border border-green-500/20'
-                            : 'bg-zinc-500/10 text-zinc-500 border border-zinc-500/20'
+                          ? 'bg-green-500/10 text-green-500 border border-green-500/20'
+                          : 'bg-zinc-500/10 text-zinc-500 border border-zinc-500/20'
                           }`}>
                           {recipient.status === 'sent' ? (
                             <>
@@ -382,8 +382,8 @@ export default function CampaignManage() {
                         <button
                           onClick={() => toggleRecipientStatus(recipient.id)}
                           className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ml-auto ${recipient.status === 'sent'
-                              ? 'bg-background border border-border text-muted-foreground hover:bg-red-500 hover:text-white hover:border-red-500'
-                              : 'bg-accent border border-accent text-white hover:bg-lavender-600'
+                            ? 'bg-background border border-border text-muted-foreground hover:bg-red-500 hover:text-white hover:border-red-500'
+                            : 'bg-accent border border-accent text-white hover:bg-lavender-600'
                             }`}
                           title={recipient.status === 'sent' ? 'Reset to Ready' : 'Manually Send'}
                         >

@@ -1,11 +1,11 @@
 import { useRouter } from 'next/navigation';
 
 import { supabase, signOut } from '@/lib/supabaseClient'
-import { campaignService } from '@/lib/campaignService'
+import { campaignService } from '@/lib/campaignService.client'
 import DashboardNavbar from '../shared/DashboardNavbar'
 import { Loader } from '../../ui/loader'
-import { 
-  FileText, 
+import {
+  FileText,
   Search,
   Filter,
   LayoutDashboard,
@@ -134,13 +134,13 @@ export default function CampaignsList() {
       }
 
       const offset = reset ? 0 : page * ITEMS_PER_PAGE
-      
+
       const { data, error } = await supabase
-          .from('campaigns')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .range(offset, offset + ITEMS_PER_PAGE - 1)
+        .from('campaigns')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .range(offset, offset + ITEMS_PER_PAGE - 1)
 
       if (error) throw error
 
@@ -194,7 +194,7 @@ export default function CampaignsList() {
       filtered = filtered.filter(c => c.status === statusFilter)
     }
     if (searchQuery) {
-      filtered = filtered.filter(c => 
+      filtered = filtered.filter(c =>
         c.name.toLowerCase().includes(searchQuery.toLowerCase())
       )
     }
@@ -257,7 +257,7 @@ export default function CampaignsList() {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', { 
+    return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
@@ -283,7 +283,7 @@ export default function CampaignsList() {
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-[#A098FF] selection:text-white">
-      <DashboardNavbar 
+      <DashboardNavbar
         user={user}
         theme={theme}
         toggleTheme={toggleTheme}
@@ -301,146 +301,146 @@ export default function CampaignsList() {
         <section className="relative pt-24 pb-16 w-full overflow-hidden bg-background">
 
 
-        <div className="relative z-10 max-w-[1400px] mx-auto px-6">
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10">
-            <div className="max-w-2xl animate-in fade-in slide-in-from-left-8 duration-1000">
+          <div className="relative z-10 max-w-[1400px] mx-auto px-6">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10">
+              <div className="max-w-2xl animate-in fade-in slide-in-from-left-8 duration-1000">
 
-              
-              <h1 className="text-4xl md:text-5xl font-serif mb-6 leading-tight text-foreground dark:text-white">
-                Keep track of all your <br /><span className="text-accent italic">creative</span> projects
-              </h1>
-              
-              <p className="text-sm md:text-base text-muted-foreground dark:text-zinc-400 max-w-xl font-medium leading-relaxed">
-                From drafts to finished work—here's everything you've been working on. A simple way to manage, organize, and revisit your campaigns anytime.
-              </p>
-            </div>
 
-            <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto animate-in fade-in slide-in-from-right-8 duration-1000">
-              <div className="relative group/search flex-1 w-full lg:min-w-[300px]">
-                <input 
-                  type="text" 
-                  placeholder="Search projects..." 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-background/50 dark:bg-white/5 border border-border dark:border-white/10 rounded-full py-4 pl-14 pr-8 text-sm font-bold text-foreground dark:text-white focus:outline-none focus:border-accent/40 transition-all placeholder:text-muted-foreground backdrop-blur-xl"
-                />
-                <Search size={18} className="absolute left-6 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within/search:text-accent transition-colors pointer-events-none" />
+                <h1 className="text-4xl md:text-5xl font-serif mb-6 leading-tight text-foreground dark:text-white">
+                  Keep track of all your <br /><span className="text-accent italic">creative</span> projects
+                </h1>
+
+                <p className="text-sm md:text-base text-muted-foreground dark:text-zinc-400 max-w-xl font-medium leading-relaxed">
+                  From drafts to finished work—here's everything you've been working on. A simple way to manage, organize, and revisit your campaigns anytime.
+                </p>
               </div>
-              
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="w-full sm:w-auto h-full px-6 py-4 rounded-full bg-background/50 dark:bg-white/5 border border-border dark:border-white/10 text-muted-foreground hover:text-foreground dark:hover:text-white transition-all flex items-center justify-center gap-3 font-bold text-[12px] cursor-pointer backdrop-blur-xl">
-                    <Filter size={16} />
-                    {statusFilter === 'all' ? 'All Projects' : statusFilter}
-                    <ChevronDown size={14} />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-background dark:bg-zinc-950 border border-border dark:border-white/10 rounded-2xl p-2 w-48 backdrop-blur-3xl">
-                  {['all', 'draft', 'active', 'processing', 'completed', 'failed'].map(status => (
-                    <DropdownMenuItem 
-                      key={status} 
-                      onClick={() => setStatusFilter(status)}
-                      className="rounded-xl focus:bg-accent focus:text-white capitalize text-xs font-bold py-2 px-4 cursor-pointer text-foreground dark:text-white"
-                    >
-                      {status}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+
+              <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto animate-in fade-in slide-in-from-right-8 duration-1000">
+                <div className="relative group/search flex-1 w-full lg:min-w-[300px]">
+                  <input
+                    type="text"
+                    placeholder="Search projects..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-background/50 dark:bg-white/5 border border-border dark:border-white/10 rounded-full py-4 pl-14 pr-8 text-sm font-bold text-foreground dark:text-white focus:outline-none focus:border-accent/40 transition-all placeholder:text-muted-foreground backdrop-blur-xl"
+                  />
+                  <Search size={18} className="absolute left-6 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within/search:text-accent transition-colors pointer-events-none" />
+                </div>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="w-full sm:w-auto h-full px-6 py-4 rounded-full bg-background/50 dark:bg-white/5 border border-border dark:border-white/10 text-muted-foreground hover:text-foreground dark:hover:text-white transition-all flex items-center justify-center gap-3 font-bold text-[12px] cursor-pointer backdrop-blur-xl">
+                      <Filter size={16} />
+                      {statusFilter === 'all' ? 'All Projects' : statusFilter}
+                      <ChevronDown size={14} />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-background dark:bg-zinc-950 border border-border dark:border-white/10 rounded-2xl p-2 w-48 backdrop-blur-3xl">
+                    {['all', 'draft', 'active', 'processing', 'completed', 'failed'].map(status => (
+                      <DropdownMenuItem
+                        key={status}
+                        onClick={() => setStatusFilter(status)}
+                        className="rounded-xl focus:bg-accent focus:text-white capitalize text-xs font-bold py-2 px-4 cursor-pointer text-foreground dark:text-white"
+                      >
+                        {status}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Content Section */}
-      <div className="max-w-[1400px] mx-auto px-6 py-20 relative z-10">
-        <div className="bg-background/50 backdrop-blur-3xl rounded-[48px] border border-border overflow-hidden">
-          {campaigns.length === 0 ? (
-            <div className="p-24 flex flex-col items-center text-center">
-              <div className="w-16 h-16 rounded-[20px] bg-accent/10 border border-accent/20 flex items-center justify-center mb-8">
-                <FileText className="text-accent" size={32} />
-              </div>
-              <h3 className="text-xl font-serif text-foreground dark:text-white mb-4">No projects yet</h3>
-              <p className="text-xs text-muted-foreground max-w-sm mb-12 leading-relaxed">No campaigns found in your archive. Start by creating a project on the dashboard.</p>
-              <button 
-                onClick={() => navigate.push('/dashboard')}
-                className="bg-accent text-white pl-8 pr-4 py-4 rounded-full font-bold text-xs hover:bg-lavender-600 transition-all flex items-center gap-4"
-              >
-                Start New Project
-                <div className="bg-black/20 rounded-full p-2">
-                   <ArrowRight size={18} />
+        {/* Content Section */}
+        <div className="max-w-[1400px] mx-auto px-6 py-20 relative z-10">
+          <div className="bg-background/50 backdrop-blur-3xl rounded-[48px] border border-border overflow-hidden">
+            {campaigns.length === 0 ? (
+              <div className="p-24 flex flex-col items-center text-center">
+                <div className="w-16 h-16 rounded-[20px] bg-accent/10 border border-accent/20 flex items-center justify-center mb-8">
+                  <FileText className="text-accent" size={32} />
                 </div>
-              </button>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th className="py-8 px-10 text-[12px] font-bold text-foreground">Campaign</th>
-                    <th className="py-8 px-6 text-[12px] font-bold text-foreground text-center">Type</th>
-                    <th className="py-8 px-6 text-[12px] font-bold text-foreground text-center">Date</th>
-                    <th className="py-8 px-6 text-[12px] font-bold text-foreground text-center">Progress</th>
-                    <th className="py-8 px-6 text-[12px] font-bold text-foreground text-center">Status</th>
-                    <th className="py-8 px-10 text-[12px] font-bold text-foreground text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/50">
-                  {campaigns.map((campaign) => (
-                    <CampaignRow 
-                      key={campaign.id}
-                      campaign={campaign}
-                      onEdit={handleOpenCampaign}
-                      onManage={handleManageCampaign}
-                      onDelete={handleDeleteClick}
-                      formatDate={formatDate}
-                      getStatusColor={getStatusColor}
-                      getProgressCount={getProgressCount}
-                    />
-                  ))}
-                </tbody>
-              </table>
-              
-              {/* Loading more indicator */}
-              <div ref={observerTarget} className="flex justify-center py-12">
-                {isLoadingMore && <Loader size={40} color="#6b55fd" />}
+                <h3 className="text-xl font-serif text-foreground dark:text-white mb-4">No projects yet</h3>
+                <p className="text-xs text-muted-foreground max-w-sm mb-12 leading-relaxed">No campaigns found in your archive. Start by creating a project on the dashboard.</p>
+                <button
+                  onClick={() => navigate.push('/dashboard')}
+                  className="bg-accent text-white pl-8 pr-4 py-4 rounded-full font-bold text-xs hover:bg-lavender-600 transition-all flex items-center gap-4"
+                >
+                  Start New Project
+                  <div className="bg-black/20 rounded-full p-2">
+                    <ArrowRight size={18} />
+                  </div>
+                </button>
               </div>
-            </div>
-          )}
-        </div>
-      </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="py-8 px-10 text-[12px] font-bold text-foreground">Campaign</th>
+                      <th className="py-8 px-6 text-[12px] font-bold text-foreground text-center">Type</th>
+                      <th className="py-8 px-6 text-[12px] font-bold text-foreground text-center">Date</th>
+                      <th className="py-8 px-6 text-[12px] font-bold text-foreground text-center">Progress</th>
+                      <th className="py-8 px-6 text-[12px] font-bold text-foreground text-center">Status</th>
+                      <th className="py-8 px-10 text-[12px] font-bold text-foreground text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/50">
+                    {campaigns.map((campaign) => (
+                      <CampaignRow
+                        key={campaign.id}
+                        campaign={campaign}
+                        onEdit={handleOpenCampaign}
+                        onManage={handleManageCampaign}
+                        onDelete={handleDeleteClick}
+                        formatDate={formatDate}
+                        getStatusColor={getStatusColor}
+                        getProgressCount={getProgressCount}
+                      />
+                    ))}
+                  </tbody>
+                </table>
 
-      {/* Delete Dialog */}
-      <AlertDialog open={deleteDialog.open} onOpenChange={(open) => !isDeleting && setDeleteDialog({ open, campaign: null })}>
-        <AlertDialogContent className="bg-background dark:bg-zinc-950 border border-border dark:border-white/10 rounded-[32px] p-8 max-w-sm mx-auto shadow-none">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-lg font-serif text-foreground dark:text-white">Delete Project?</AlertDialogTitle>
-            <AlertDialogDescription className="text-zinc-500 py-2 text-xs">
-              Are you sure you want to remove "{deleteDialog.campaign?.name}"? All project data and logs will be permanently lost.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col sm:flex-row gap-4 mt-6">
-            <AlertDialogCancel disabled={isDeleting} className="flex-1 rounded-full border-border bg-foreground/5 text-[12px] font-bold py-6 hover:bg-foreground/10 cursor-pointer text-foreground">
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteConfirm}
-              disabled={isDeleting}
-              className="flex-1 rounded-full bg-red-500 text-white text-[12px] font-bold py-6 hover:bg-red-600 cursor-pointer"
-            >
-              {isDeleting ? 'Removing...' : 'Delete Project'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-        </main>
-      </div>
-    )
-  }
+                {/* Loading more indicator */}
+                <div ref={observerTarget} className="flex justify-center py-12">
+                  {isLoadingMore && <Loader size={40} color="#6b55fd" />}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Delete Dialog */}
+        <AlertDialog open={deleteDialog.open} onOpenChange={(open) => !isDeleting && setDeleteDialog({ open, campaign: null })}>
+          <AlertDialogContent className="bg-background dark:bg-zinc-950 border border-border dark:border-white/10 rounded-[32px] p-8 max-w-sm mx-auto shadow-none">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-lg font-serif text-foreground dark:text-white">Delete Project?</AlertDialogTitle>
+              <AlertDialogDescription className="text-zinc-500 py-2 text-xs">
+                Are you sure you want to remove "{deleteDialog.campaign?.name}"? All project data and logs will be permanently lost.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex-col sm:flex-row gap-4 mt-6">
+              <AlertDialogCancel disabled={isDeleting} className="flex-1 rounded-full border-border bg-foreground/5 text-[12px] font-bold py-6 hover:bg-foreground/10 cursor-pointer text-foreground">
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+                className="flex-1 rounded-full bg-red-500 text-white text-[12px] font-bold py-6 hover:bg-red-600 cursor-pointer"
+              >
+                {isDeleting ? 'Removing...' : 'Delete Project'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </main>
+    </div>
+  )
+}
 
 function CampaignRow({ campaign, onEdit, onManage, onDelete, formatDate, getStatusColor, getProgressCount }) {
-  const progressPercent = campaign.total_certificates > 0 
-    ? Math.round((getProgressCount(campaign) / campaign.total_certificates) * 100) 
+  const progressPercent = campaign.total_certificates > 0
+    ? Math.round((getProgressCount(campaign) / campaign.total_certificates) * 100)
     : 0
 
   return (
@@ -448,15 +448,15 @@ function CampaignRow({ campaign, onEdit, onManage, onDelete, formatDate, getStat
       {/* Campaign Identity */}
       <td className="py-7 px-10">
         <div className="flex items-center gap-5">
-           <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center p-0.5 group-hover:bg-accent/20 transition-colors">
-              <FileCheck size={18} className="text-accent" />
-           </div>
-           <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-sm text-foreground truncate leading-tight mb-1">{campaign.name}</h3>
-              <p className="text-[12px] font-medium text-muted-foreground/60">
-                {getProgressCount(campaign)} / {campaign.total_certificates} completed
-              </p>
-           </div>
+          <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center p-0.5 group-hover:bg-accent/20 transition-colors">
+            <FileCheck size={18} className="text-accent" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-bold text-sm text-foreground truncate leading-tight mb-1">{campaign.name}</h3>
+            <p className="text-[12px] font-medium text-muted-foreground/60">
+              {getProgressCount(campaign)} / {campaign.total_certificates} completed
+            </p>
+          </div>
         </div>
       </td>
 
@@ -476,10 +476,10 @@ function CampaignRow({ campaign, onEdit, onManage, onDelete, formatDate, getStat
       <td className="py-7 px-6">
         <div className="flex flex-col items-center gap-2 max-w-[80px] mx-auto">
           <div className="w-full h-0.5 bg-border dark:bg-white/5 rounded-full overflow-hidden">
-             <div 
-               className="h-full bg-accent transition-all duration-1000 group-hover:bg-[#A098FF]" 
-               style={{ width: `${progressPercent}%` }}
-             />
+            <div
+              className="h-full bg-accent transition-all duration-1000 group-hover:bg-[#A098FF]"
+              style={{ width: `${progressPercent}%` }}
+            />
           </div>
           <span className="text-[9px] font-bold text-foreground">{progressPercent}%</span>
         </div>
@@ -502,7 +502,7 @@ function CampaignRow({ campaign, onEdit, onManage, onDelete, formatDate, getStat
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40 bg-background rounded-[20px] p-2 backdrop-blur-3xl shadow-xl">
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={() => onEdit(campaign)}
                 className="rounded-xl text-[11px] font-bold py-3 px-3 cursor-pointer flex items-center gap-3 group focus:bg-accent focus:text-white hover:bg-accent hover:text-white"
               >
@@ -511,7 +511,7 @@ function CampaignRow({ campaign, onEdit, onManage, onDelete, formatDate, getStat
                 </div>
                 Edit
               </DropdownMenuItem>
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={() => onManage(campaign)}
                 className="rounded-xl text-[11px] font-bold py-3 px-3 cursor-pointer flex items-center gap-3 group focus:bg-accent focus:text-white hover:bg-accent hover:text-white"
               >
@@ -520,7 +520,7 @@ function CampaignRow({ campaign, onEdit, onManage, onDelete, formatDate, getStat
                 </div>
                 Manage
               </DropdownMenuItem>
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={() => onDelete(campaign)}
                 className="rounded-xl text-[11px] font-bold py-3 px-3 cursor-pointer text-red-500 focus:bg-red-500 focus:text-white hover:bg-red-500 hover:text-white flex items-center gap-3 group"
               >

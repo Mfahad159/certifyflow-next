@@ -1,7 +1,7 @@
 import Dashboard from "@/components/dashboard/index/Dashboard"
 import { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth.server";
-import { getRecentCampaigns, getUserStats } from "@/lib/services/campaignService";
+import { getRecentCampaigns, getUserStats } from "@/lib/campaignService.server";
 
 export const metadata: Metadata = {
     title: "Dashboard | CertifyFlow",

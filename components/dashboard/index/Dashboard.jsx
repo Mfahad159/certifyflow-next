@@ -25,7 +25,7 @@ import {
 } from 'lucide-react'
 
 import { createClient } from '@/lib/supabase/client'
-import { campaignService } from '@/lib/campaignService'
+import { campaignService } from '@/lib/campaignService.client'
 import { Loader2 as Loader } from 'lucide-react'
 import { logout as signOut } from '@/lib/auth'
 
