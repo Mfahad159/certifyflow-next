@@ -1,3 +1,4 @@
+import Image from "next/image";
 "use client";
 import React, { useState, useEffect, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
@@ -110,7 +111,7 @@ export default function DashboardSidebar({
           onClick={() => navigate('/dashboard')}
         >
           <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
-            <img src="/assest/logo.svg" alt="logo" className="h-6 w-6" />
+            <Image src="/assest/logo.svg" alt="logo" className="h-6 w-6" width={40} height={40} />
           </div>
           <span
             className={`text-base font-serif font-bold text-foreground whitespace-nowrap transition-all duration-500 ${isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'

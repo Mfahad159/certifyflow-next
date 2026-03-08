@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { LogOut, User, ChevronDown, Settings } from 'lucide-react';
@@ -67,7 +68,7 @@ export default function Navbar() {
           className="pointer-events-auto flex items-center gap-3 bg-secondary/50 dark:bg-background/10 backdrop-blur-2xl px-3 py-2.5 rounded-[32px] border border-border cursor-pointer transition-all hover:bg-background/20"
           onClick={() => navigate.push('/')}
         >
-          <img src="/assest/logo.svg" alt="logo" className="h-7 w-7" />
+          <Image src="/assest/logo.svg" alt="logo" className="h-7 w-7" width={40} height={40} />
           <span className="text-xl font-serif font-bold text-foreground">CertifyFlow</span>
         </div>
 

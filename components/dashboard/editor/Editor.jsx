@@ -17,14 +17,14 @@ import UnsavedDialog from './components/UnsavedDialog'
 import EmailTemplateModal from '../shared/EmailTemplateModal'
 
 
-export default function Editor() {
+export default function Editor({ campaignType: initialCampaignType = 'generate_only' }) {
   const navigate = useRouter()
   const pathname = usePathname()
   const { campaignId, templateId } = useParams()
 
   // Determine editor mode based on URL or parameters
   const isTemplateMode = pathname.includes('/templates/')
-  const [campaignType, setCampaignType] = useState('generate_only')
+  const [campaignType, setCampaignType] = useState(initialCampaignType)
   const isEmailSendEnabled = !isTemplateMode && campaignType === 'generate_send'
 
   const canvasRef = useRef(null)

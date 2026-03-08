@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect } from 'react';
 import Navbar from '../shared/Navbar';
 import Hero from './components/Hero';
@@ -35,7 +36,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-[#A098FF] selection:text-white">
       <Navbar />
-      <Hero 
+      <Hero
         title={<>Send and track thousands of certificates, <span className="text-accent italic font-bold">without</span> the headache.</>}
         description="Tired of messy spreadsheets? We help you run smooth certification campaigns, send professional emails automatically, and fix recipient typos in one click. It’s like having an extra pair of hands."
         secondaryCTA={{

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Sparkles } from 'lucide-react';
 
@@ -12,10 +13,10 @@ export default function FooterCTA() {
         <div className="relative p-12 md:p-24 flex flex-col items-center text-center">
           {/* Decorative icons in background */}
           <div className="absolute top-12 left-12 opacity-5 rotate-[-15deg] pointer-events-none">
-             <img src="/assest/logo.svg" alt="" className="w-48 h-48" />
+             <Image src="/assest/logo.svg" alt="" className="w-48 h-48" width={40} height={40} />
           </div>
           <div className="absolute bottom-12 right-12 opacity-5 rotate-[15deg] pointer-events-none">
-             <img src="/assest/logo.svg" alt="" className="w-48 h-48" />
+             <Image src="/assest/logo.svg" alt="" className="w-48 h-48" width={40} height={40} />
           </div>
 
           <div className="relative z-10 max-w-5xl mx-auto">

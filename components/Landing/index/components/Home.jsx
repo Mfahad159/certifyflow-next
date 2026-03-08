@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { useRouter } from 'next/navigation';
 
 import { 
@@ -62,7 +63,7 @@ export default function Home() {
       `}>
         <div className="p-6 flex items-center justify-between border-b border-border">
           <div className="flex items-center gap-3">
-            <img src="/assest/logo.svg" alt="logo" className="h-7 w-7" />
+            <Image src="/assest/logo.svg" alt="logo" className="h-7 w-7" width={40} height={40} />
             <span className="text-lg font-serif font-black">CertifyFlow</span>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-muted-foreground cursor-pointer">

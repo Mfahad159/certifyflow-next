@@ -1,3 +1,11 @@
+import Editor from "@/components/dashboard/editor/Editor";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "Generate & Send | CertifyFlow",
+    description: "Import CSV, map fields, and email certificates.",
+};
+
 export default function GenerateSendPage() {
-    return <div>Generate and Send Flow Placeholder</div>;
+    return <Editor campaignType="generate_send" />;
 }
