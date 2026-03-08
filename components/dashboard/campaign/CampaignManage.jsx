@@ -114,7 +114,7 @@ export default function CampaignManage() {
 
   const handleLogout = async () => {
     await signOut()
-    navigate('/')
+    navigate.push('/')
   }
 
   if (isLoading) {
@@ -196,7 +196,7 @@ export default function CampaignManage() {
         <div className="text-center">
           <h2 className="text-2xl font-serif font-bold mb-4">No Campaign Data</h2>
           <button
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate.push('/dashboard')}
             className="bg-accent text-white px-6 py-3 rounded-full font-bold hover:bg-[#A098FF]/90 transition-all"
           >
             Back to Dashboard

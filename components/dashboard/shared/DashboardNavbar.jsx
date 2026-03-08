@@ -108,7 +108,7 @@ export default function DashboardSidebar({
       <div ref={logoRef} className="h-20 flex items-center px-5 flex-shrink-0">
         <div
           className="flex items-center gap-3 cursor-pointer w-full overflow-hidden"
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate.push('/dashboard')}
         >
           <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
             <Image src="/assest/logo.svg" alt="logo" className="h-6 w-6" width={40} height={40} />
@@ -130,7 +130,7 @@ export default function DashboardSidebar({
             {mainNavItems.map((item) => (
               <div key={item.id}>
                 <button
-                  onClick={() => navigate(item.path)}
+                  onClick={() => navigate.push(item.path)}
                   className={`relative flex items-center gap-3 w-full min-h-[44px] font-medium text-[13px] cursor-pointer group transition-all duration-500 ease-in-out overflow-hidden rounded-xl ${currentPage === item.id
                     ? 'bg-accent/10 text-accent'
                     : 'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
@@ -158,7 +158,7 @@ export default function DashboardSidebar({
             {insightNavItems.map((item) => (
               <div key={item.id}>
                 <button
-                  onClick={() => navigate(item.path)}
+                  onClick={() => navigate.push(item.path)}
                   className={`relative flex items-center gap-3 w-full min-h-[44px] font-medium text-[13px] cursor-pointer group transition-all duration-500 ease-in-out overflow-hidden rounded-xl ${currentPage === item.id
                     ? 'bg-accent/10 text-accent'
                     : 'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
@@ -216,7 +216,7 @@ export default function DashboardSidebar({
             <div className="absolute bottom-full left-0 right-0 mb-2 bg-background border border-border rounded-xl shadow-lg overflow-hidden">
               <button
                 onClick={() => {
-                  navigate('/dashboard/settings')
+                  navigate.push('/dashboard/settings')
                   setIsDropdownOpen(false)
                 }}
                 className="w-full flex items-center gap-3 px-4 py-3 hover:bg-foreground/5 transition-colors text-left"

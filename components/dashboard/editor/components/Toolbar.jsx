@@ -1,18 +1,18 @@
 import React from 'react';
-import { 
-  ArrowLeft, 
-  FileText, 
-  PanelLeftClose, 
-  PanelLeftOpen, 
-  PanelRightClose, 
-  PanelRightOpen, 
-  ZoomOut, 
-  ZoomIn, 
-  Save, 
-  Loader2, 
-  Minimize2, 
-  Maximize2, 
-  User, 
+import {
+  ArrowLeft,
+  FileText,
+  PanelLeftClose,
+  PanelLeftOpen,
+  PanelRightClose,
+  PanelRightOpen,
+  ZoomOut,
+  ZoomIn,
+  Save,
+  Loader2,
+  Minimize2,
+  Maximize2,
+  User,
   LogOut,
   Cloud
 } from 'lucide-react';
@@ -50,14 +50,14 @@ const Toolbar = ({
         py-2.5 border border-border
       ">
         <div className="flex items-center gap-4">
-          <button 
+          <button
             onClick={() => {
               if (hasUnsavedChanges) {
                 setShowUnsavedDialog(true);
               } else {
-                navigate('/dashboard');
+                navigate.push('/dashboard');
               }
-            }} 
+            }}
             className="p-2 rounded-full hover:bg-foreground/5 transition-colors text-foreground cursor-pointer"
             title="Back to Dashboard"
           >
@@ -68,12 +68,12 @@ const Toolbar = ({
               <FileText size={20} className="text-accent" />
             </div>
             <div>
-               <h1 className="text-base font-serif font-bold leading-none">
-                 {campaignName || 'Certificate Editor'}
-               </h1>
-               <p className="text-[12px] font-bold text-muted-foreground mt-1">
-                 {isTemplateMode ? 'Template Builder' : (campaignName ? 'Editing Campaign' : 'Design Studio')}
-               </p>
+              <h1 className="text-base font-serif font-bold leading-none">
+                {campaignName || 'Certificate Editor'}
+              </h1>
+              <p className="text-[12px] font-bold text-muted-foreground mt-1">
+                {isTemplateMode ? 'Template Builder' : (campaignName ? 'Editing Campaign' : 'Design Studio')}
+              </p>
             </div>
           </div>
         </div>
@@ -100,7 +100,7 @@ const Toolbar = ({
           </div>
 
           <ThemeToggle />
-          
+
           {/* Auto-save indicator */}
           {(isAutoSaving || isSavingWork || (lastSavedTime && !hasUnsavedChanges)) && (
             <div className="flex items-center gap-1.5 px-2 text-xs text-muted-foreground">
@@ -117,7 +117,7 @@ const Toolbar = ({
               )}
             </div>
           )}
-          
+
           {/* Unsaved changes indicator */}
           {hasUnsavedChanges && !isAutoSaving && !isSavingWork && (
             <div className="flex items-center gap-1.5 px-2 text-xs text-orange-500">

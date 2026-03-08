@@ -1,21 +1,21 @@
 import React from 'react';
-import { 
-  AlertDialog, 
-  AlertDialogAction, 
-  AlertDialogCancel, 
-  AlertDialogContent, 
-  AlertDialogDescription, 
-  AlertDialogFooter, 
-  AlertDialogHeader, 
-  AlertDialogTitle 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
 } from '../../../ui/alert-dialog';
 
-const UnsavedDialog = ({ 
-  showUnsavedDialog, 
-  setShowUnsavedDialog, 
-  isSavingWork, 
-  navigate, 
-  handleSaveWork 
+const UnsavedDialog = ({
+  showUnsavedDialog,
+  setShowUnsavedDialog,
+  isSavingWork,
+  navigate,
+  handleSaveWork
 }) => {
   return (
     <AlertDialog open={showUnsavedDialog} onOpenChange={(open) => {
@@ -32,19 +32,19 @@ const UnsavedDialog = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel 
+          <AlertDialogCancel
             disabled={isSavingWork}
             onClick={() => {
               setShowUnsavedDialog(false);
-              navigate('/dashboard');
+              navigate.push('/dashboard');
             }}
           >
             Don't Save
           </AlertDialogCancel>
-          <AlertDialogAction 
+          <AlertDialogAction
             onClick={async () => {
               await handleSaveWork();
-              navigate('/dashboard');
+              navigate.push('/dashboard');
             }}
             disabled={isSavingWork}
             className="bg-accent text-white hover:bg-accent/90"
