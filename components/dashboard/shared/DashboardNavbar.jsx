@@ -1,5 +1,5 @@
-import Image from "next/image";
 "use client";
+import Image from "next/image";
 import React, { useState, useEffect, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import {
@@ -100,7 +100,7 @@ export default function DashboardSidebar({
   return (
     <aside
       ref={sidebarRef}
-      className={`fixed left-0 top-0 bottom-0 z-50 bg-background flex flex-col transition-all duration-500 ease-in-out ${isExpanded ? 'w-64' : 'w-20'}`}
+      className={`fixed left-0 top-0 bottom-0 z-40 bg-background flex flex-col transition-all duration-300 ease-in-out ${isExpanded ? 'w-64' : 'w-20'}`}
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
     >
@@ -132,8 +132,8 @@ export default function DashboardSidebar({
                 <button
                   onClick={() => navigate(item.path)}
                   className={`relative flex items-center gap-3 w-full min-h-[44px] font-medium text-[13px] cursor-pointer group transition-all duration-500 ease-in-out overflow-hidden rounded-xl ${currentPage === item.id
-                      ? 'bg-accent/10 text-accent'
-                      : 'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
+                    ? 'bg-accent/10 text-accent'
+                    : 'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
                     }`}
                   title={!isExpanded ? item.label : ''}
                 >
@@ -160,8 +160,8 @@ export default function DashboardSidebar({
                 <button
                   onClick={() => navigate(item.path)}
                   className={`relative flex items-center gap-3 w-full min-h-[44px] font-medium text-[13px] cursor-pointer group transition-all duration-500 ease-in-out overflow-hidden rounded-xl ${currentPage === item.id
-                      ? 'bg-accent/10 text-accent'
-                      : 'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
+                    ? 'bg-accent/10 text-accent'
+                    : 'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
                     }`}
                   title={!isExpanded ? item.label : ''}
                 >
@@ -187,7 +187,7 @@ export default function DashboardSidebar({
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="w-full flex items-center min-h-[44px] rounded-xl hover:bg-foreground/5 transition-all duration-500 overflow-hidden"
+            className="w-full flex items-center min-h-[44px] rounded-xl hover:bg-foreground/5 transition-all duration-300 overflow-hidden"
           >
             <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center">
               <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">

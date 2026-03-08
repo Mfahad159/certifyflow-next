@@ -1,0 +1,22 @@
+﻿
+> certifyflow-next@0.1.0 build D:\SAAS_Certify\certifyflow-next
+> next build
+
+Γû▓ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 12.1s
+  Running TypeScript ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/14) ...
+  Generating static pages using 3 workers (3/14) 
+  Generating static pages using 3 workers (6/14) 
+Error occurred prerendering page "/generate". Read more: https://nextjs.org/docs/messages/prerender-error
+ReferenceError: Loader is not defined
+    at ci (D:\SAAS_Certify\certifyflow-next\.next\server\chunks\ssr\[root-of-the-server]__bac223f6._.js:69:9488) {
+  digest: '914551069'
+}
+Export encountered an error on /generate/page: /generate, exiting the build.
+Γ¿» Next.js build worker exited with code: 1 and signal: null
+ΓÇëELIFECYCLEΓÇë Command failed with exit code 1.

@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -279,8 +280,8 @@ export default function CampaignModal({ isOpen, onClose, campaignType, userId })
                       <button
                         onClick={() => setSelectedMode('generate_only')}
                         className={`flex items-center gap-3 p-4 rounded-2xl border text-left transition-all ${selectedMode === 'generate_only'
-                            ? 'bg-accent/10 border-accent ring-1 ring-accent'
-                            : 'bg-background hover:bg-secondary/50 border-border'
+                          ? 'bg-accent/10 border-accent ring-1 ring-accent'
+                          : 'bg-background hover:bg-secondary/50 border-border'
                           }`}
                       >
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${selectedMode === 'generate_only' ? 'bg-accent text-white' : 'bg-secondary text-muted-foreground'}`}>
@@ -295,8 +296,8 @@ export default function CampaignModal({ isOpen, onClose, campaignType, userId })
                       <button
                         onClick={() => setSelectedMode('generate_send')}
                         className={`flex items-center gap-3 p-4 rounded-2xl border text-left transition-all ${selectedMode === 'generate_send'
-                            ? 'bg-accent/10 border-accent ring-1 ring-accent'
-                            : 'bg-background hover:bg-secondary/50 border-border'
+                          ? 'bg-accent/10 border-accent ring-1 ring-accent'
+                          : 'bg-background hover:bg-secondary/50 border-border'
                           }`}
                       >
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${selectedMode === 'generate_send' ? 'bg-accent text-white' : 'bg-secondary text-muted-foreground'}`}>

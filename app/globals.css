@@ -1,26 +1,161 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: 24px;
+  --radius-3xl: 32px;
 
-@theme inline {
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
+  --shadow-inner: none;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+
+  --color-lavender-50: #f3f2ff;
+  --color-lavender-100: #e8e8ff;
+  --color-lavender-200: #d4d4ff;
+  --color-lavender-300: #b5b2ff;
+  --color-lavender-400: #a098ff;
+  --color-lavender-500: #6b55fd;
+  --color-lavender-600: #5832f5;
+  --color-lavender-700: #4920e1;
+  --color-lavender-800: #3e1abd;
+  --color-lavender-900: #34189a;
+  --color-lavender-950: #1d0c69;
+
+  --font-serif: var(--font-serif), serif;
+  --font-sans: var(--font-sans), sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --radius: 1rem;
+  
+  /* Warm Light Palette */
+  --background: #ffffff;
+  --foreground: #000000;
+  
+  --primary: #000000;
+  --primary-foreground: #FFFFFF;
+  
+  --secondary: #F5F0E1;
+  --secondary-foreground: #000000;
+  
+  --muted: #ffffff;
+  --muted-foreground: #6B6B6B;
+  
+  /* New Dull Lavender Palette Mapping */
+  --accent: #6b55fd;
+  --accent-foreground: #ffffff;
+  
+  --border: rgba(0, 0, 0, 0.08);
+  --ring: #000000;
+}
+
+.dark {
+  --background: #000000;
+  --foreground: #ffffff;
+  
+  --primary: #ffffff;
+  --primary-foreground: #000000;
+  
+  --secondary: #1A1A1A;
+  --secondary-foreground: #ffffff;
+  
+  --muted: #262626;
+  --muted-foreground: #A1A1A1;
+  
+  --accent: #6b55fd;
+  --accent-foreground: #ffffff;
+  
+  --border: rgba(255, 255, 255, 0.1);
+  --ring: #FFFDF9;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  
+  html,
+  body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none;
+  }
+  
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    background-color: var(--background);
+  }
+
+  input[type="color"]{
+    border-radius: 0.125rem !important;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .cinematic-overlay {
+    background: linear-gradient(to bottom, var(--background-opacity, rgba(255,250,236,0.3)) 0%, var(--background) 100%);
+  }
+  
+  .dark .cinematic-overlay {
+    --background-opacity: rgba(10,10,10,0.8);
+  }
+  
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .feature-card {
+    @apply p-8 rounded-3xl bg-secondary/10 backdrop-blur-sm border border-border;
+    @apply transition-all duration-300;
+    @apply hover:bg-secondary/80 hover:border-border;
+    @apply hover:-translate-y-1;
+  }
+  
+  .dark .feature-card {
+    @apply bg-white/5 hover:bg-white/[0.08];
+  }
+}
+
+@keyframes splash {
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
 }

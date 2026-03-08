@@ -1,6 +1,9 @@
 "use client";
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import QRCode from 'qrcode';
 import { useRouter, useParams, usePathname } from 'next/navigation';
+import { supabase } from '@/lib/supabaseClient'
+import { campaignService } from '@/lib/campaignService.client'
 
 import { toast } from 'sonner'
 import { usePinch } from '@use-gesture/react'
