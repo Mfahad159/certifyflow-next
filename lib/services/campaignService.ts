@@ -26,6 +26,23 @@ export async function getCampaigns(): Promise<Campaign[]> {
     return data as Campaign[]
 }
 
+export async function getRecentCampaigns(userId: string): Promise<Campaign[]> {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+        .from('campaigns')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(5)
+
+    if (error) {
+        console.error('Error fetching recent campaigns:', error.message)
+        throw new Error(error.message)
+    }
+
+    return data as Campaign[]
+}
+
 export async function getCampaignById(id: string): Promise<Campaign | null> {
     const supabase = await createClient()
     const { data, error } = await supabase
