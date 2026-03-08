@@ -27,7 +27,7 @@ import {
 import { createClient } from '@/lib/supabase/client'
 import { campaignService } from '@/lib/campaignService'
 import { Loader2 as Loader } from 'lucide-react'
-import { signOut } from '@/lib/supabase/client' // this may not exist, we should use supabase.auth.signOut()
+import { logout as signOut } from '@/lib/auth'
 
 // Import UI components that might be missing (assuming they exist in the project)
 import {
@@ -35,8 +35,8 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
 } from "@/components/ui/alert-dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import DashboardNavbar from "./DashboardNavbar" // or wherever it is
-import CampaignModal from "./CampaignModal"
+import DashboardNavbar from "../../shared/DashboardNavbar"
+import CampaignModal from "../../shared/CampaignModal"
 
 export default function Dashboard({ initialUser, initialCampaigns, initialStats }) {
   const navigate = useRouter()
