@@ -35,8 +35,8 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
 } from "@/components/ui/alert-dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import DashboardNavbar from "../../shared/DashboardNavbar"
-import CampaignModal from "../../shared/CampaignModal"
+import DashboardNavbar from "../shared/DashboardNavbar"
+import CampaignModal from "../shared/CampaignModal"
 
 export default function Dashboard({ initialUser, initialCampaigns, initialStats }) {
   const navigate = useRouter()
