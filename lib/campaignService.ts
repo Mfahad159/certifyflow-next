@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase } from './supabaseClient'
 import type { Database } from './database.types'
 
 type Campaign = Database['public']['Tables']['campaigns']['Row']
@@ -14,7 +14,7 @@ export const campaignService = {
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
-    
+
     if (error) throw error
     return data || []
   },
@@ -27,7 +27,7 @@ export const campaignService = {
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(5)
-    
+
     if (error) throw error
     return data || []
   },
@@ -40,7 +40,7 @@ export const campaignService = {
       .eq('user_id', userId)
       .eq('status', 'processing')
       .order('created_at', { ascending: false })
-    
+
     if (error) throw error
     return data || []
   },
@@ -52,7 +52,7 @@ export const campaignService = {
       .insert(campaign)
       .select()
       .single()
-    
+
     if (error) throw error
     return data
   },
@@ -65,7 +65,7 @@ export const campaignService = {
       .eq('id', id)
       .select()
       .single()
-    
+
     if (error) throw error
     return data
   },
@@ -76,7 +76,7 @@ export const campaignService = {
       .from('campaigns')
       .delete()
       .eq('id', id)
-    
+
     if (error) throw error
   },
 
@@ -87,7 +87,7 @@ export const campaignService = {
       .select('*')
       .eq('user_id', userId)
       .single()
-    
+
     if (error) {
       // If no stats exist, create them
       if (error.code === 'PGRST116') {
@@ -111,7 +111,7 @@ export const campaignService = {
       })
       .select()
       .single()
-    
+
     if (error) throw error
     return data
   },
@@ -124,19 +124,19 @@ export const campaignService = {
       .select('*')
       .eq('user_id', userId)
       .eq('status', 'completed')
-    
+
     if (campaignsError) throw campaignsError
 
     const totalCertificates = campaigns?.reduce((sum, c) => sum + (c.certificates_generated || 0), 0) || 0
     const totalEmails = campaigns?.reduce((sum, c) => sum + (c.emails_sent || 0), 0) || 0
     const totalCampaigns = campaigns?.length || 0
-    
+
     // Calculate success rate
     const { data: allCampaigns } = await supabase
       .from('campaigns')
       .select('status')
       .eq('user_id', userId)
-    
+
     const completedCount = allCampaigns?.filter(c => c.status === 'completed').length || 0
     const totalCount = allCampaigns?.length || 1
     const successRate = (completedCount / totalCount) * 100
@@ -146,7 +146,7 @@ export const campaignService = {
       .from('private_templates')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', userId)
-    
+
     if (templateError) throw templateError
 
     const { data, error } = await supabase
@@ -162,7 +162,7 @@ export const campaignService = {
       })
       .select()
       .single()
-    
+
     if (error) throw error
     return data
   }
