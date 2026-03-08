@@ -232,7 +232,7 @@ export default function CampaignModal({ isOpen, onClose, campaignType, userId })
       setSelectedMode(null)
       setCsvFile(null)
       setError('')
-      onClose()
+      onClose?.()
     }
   }
 
