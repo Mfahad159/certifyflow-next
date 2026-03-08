@@ -164,28 +164,28 @@ export default function Dashboard({ initialUser, initialCampaigns, initialStats 
 
   const statsData = [
     {
-      title: 'Total Certificates',
-      value: stats?.total_certificates || 0,
-      icon: TrendingUp,
-      color: 'text-accent'
-    },
-    {
-      title: 'Emails Sent',
-      value: stats?.emails_sent || 0,
-      icon: Zap,
+      title: 'Total Campaigns',
+      value: stats?.total_campaigns || 0,
+      icon: LayoutDashboard,
       color: 'text-blue-500'
     },
     {
-      title: 'Verified Certificates',
-      value: stats?.verified_count || 0,
-      icon: FileCheck,
+      title: 'Certificates Generated',
+      value: stats?.total_certificates_generated || 0,
+      icon: FileText,
+      color: 'text-purple-500'
+    },
+    {
+      title: 'Emails Sent',
+      value: stats?.total_emails_sent || 0,
+      icon: Send,
       color: 'text-green-500'
     },
     {
-      title: 'Active Campaigns',
-      value: stats?.active_campaigns || 0,
-      icon: Search,
-      color: 'text-orange-500'
+      title: 'Success Rate',
+      value: `${stats?.success_rate || 0}%`,
+      icon: CheckCircle2,
+      color: 'text-amber-500'
     }
   ]
 
