@@ -1,5 +1,6 @@
 "use client";
 import { useRouter, useParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 import { supabase } from '@/lib/supabaseClient'
 import { Card, CardHeader, CardTitle, CardContent } from '../../ui/card'
