@@ -11,7 +11,7 @@ import { templateService } from '@/lib/templateService'
 import Hero from '../index/components/Hero'
 
 export default function TemplatesPage() {
-  const navigate = useRouter()
+  const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [templates, setTemplates] = useState([])
   const [displayTemplates, setDisplayTemplates] = useState([])
@@ -195,7 +195,7 @@ export default function TemplatesPage() {
         description="Professionally crafted, high-fidelity certificate designs. Choose a starting point or build your own project from scratch."
         primaryCTA={{
           text: "Start Designing Now",
-          onClick: () => navigate('/dashboard')
+          onClick: () => router.push('/dashboard')
         }}
         childrenAboveButtons={true}
       >
@@ -243,7 +243,7 @@ export default function TemplatesPage() {
                   {/* Hover Overlay */}
                   <div className="absolute inset-0 bg-black/40 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center gap-4">
                     <button
-                      onClick={() => navigate('/dashboard')}
+                      onClick={() => router.push('/dashboard')}
                       className="p-3 bg-white text-black rounded-full hover:scale-110 transition-transform"
                       title="Quick Use"
                     >

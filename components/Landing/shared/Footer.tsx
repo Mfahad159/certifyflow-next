@@ -66,12 +66,12 @@ export default function Footer() {
         <div className="flex flex-col sm:flex-row justify-between items-center pt-8 border-t border-white/5 w-full gap-4">
           <div className="text-center sm:text-left">
             <p className="text-zinc-600 text-[12px] font-medium">
-              © 2024 CertifyFlow — Built for the winners.
+              © 2026 CertifyFlow — Built for the winners.
             </p>
           </div>
           <div className="text-center sm:text-right">
             <p className="text-zinc-700 text-[12px]">
-              coded with ☕ & 🎧 by <a href="https://github.com/theajmalrazaq" target="_blank" rel="noreferrer" className="text-zinc-500 hover:text-accent transition-colors">ajmal</a>
+              coded with ☕ & 🎧 by <a href="https://github.com/Mfahad159" target="_blank" rel="noreferrer" className="text-zinc-500 hover:text-accent transition-colors">Fahad & Ajmal</a>
             </p>
           </div>
         </div>

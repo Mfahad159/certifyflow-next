@@ -4,6 +4,7 @@ import QRCode from 'qrcode';
 import { useRouter, useParams, usePathname } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient'
 import { campaignService } from '@/lib/campaignService.client'
+import { Loader } from '../../ui/loader'
 
 import { toast } from 'sonner'
 import { usePinch } from '@use-gesture/react'
