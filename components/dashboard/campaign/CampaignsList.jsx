@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { supabase, signOut } from '@/lib/supabaseClient'
+import { supabase } from '@/lib/supabaseClient'
+import { logout as signOut } from '@/lib/auth'
 import { campaignService } from '@/lib/campaignService.client'
 import DashboardNavbar from '../shared/DashboardNavbar'
-import { Loader } from '../../ui/loader'
+import { Loader } from '@/components/ui/loader'
 import {
   FileText,
   Search,
@@ -25,7 +26,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from '../../ui/dropdown-menu'
+} from '@/components/ui/dropdown-menu'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,7 +36,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../../ui/alert-dialog'
+} from '@/components/ui/alert-dialog'
 
 const ITEMS_PER_PAGE = 10
 const BACKGROUND_IMG = "https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2029&auto=format&fit=crop";
@@ -203,11 +204,11 @@ export default function CampaignsList() {
   }
 
   const handleOpenCampaign = (campaign) => {
-    navigate.push(`/dashboard/edit/${campaign.id}`, { state: { campaign } })
+    navigate.push(`/dashboard/edit/${campaign.id}`)
   }
 
   const handleManageCampaign = (campaign) => {
-    navigate.push(`/dashboard/manage/${campaign.id}`, { state: { campaign } })
+    navigate.push(`/dashboard/manage/${campaign.id}`)
   }
 
   const toggleTheme = () => {

@@ -4,7 +4,8 @@ import { useRouter } from 'next/navigation';
 import DashboardNavbar from '../shared/DashboardNavbar'
 import { templateService } from '@/lib/templateService'
 import { supabase } from '@/lib/supabaseClient'
-import { Loader } from '../../ui/loader'
+import { logout as signOut } from '@/lib/auth'
+import { Loader } from '@/components/ui/loader'
 import TemplateThumbnail, { getTemplatePreviewHtml } from '../shared/TemplateThumbnail'
 import {
   Plus,
@@ -26,7 +27,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../../ui/alert-dialog'
+} from '@/components/ui/alert-dialog'
 
 const BACKGROUND_IMG = "https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2029&auto=format&fit=crop";
 
@@ -103,7 +104,7 @@ export default function TemplatesPage() {
   }
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
+    await signOut()
     navigate.push('/')
   }
 
