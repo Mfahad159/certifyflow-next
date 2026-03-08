@@ -29,7 +29,7 @@ import {
 
 import { createClient } from '@/lib/supabase/client'
 import { campaignService } from '@/lib/campaignService.client'
-import { Loader2 as Loader } from 'lucide-react'
+import { Loader } from "@/components/ui/loader"
 import { logout as signOut } from '@/lib/auth'
 
 // Import UI components that might be missing (assuming they exist in the project)
@@ -438,7 +438,7 @@ export default function Dashboard({ initialUser, initialCampaigns, initialStats 
                 Are you sure you want to delete "{deleteDialog.campaign?.name}"? This action cannot be undone and will permanently delete all campaign data including certificates.
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter className="flex-col sm:flex-row gap-4 mt-6">
+            <AlertDialogFooter className="mt-6">
               <AlertDialogCancel disabled={isDeleting} className="flex-1 rounded-full border-border bg-foreground/5 text-[12px] font-bold py-6 hover:bg-foreground/10 cursor-pointer">
                 Cancel
               </AlertDialogCancel>

@@ -1,6 +1,11 @@
 "use client";
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import JSZip from 'jszip'
+import { jsPDF } from 'jspdf'
 import QRCode from 'qrcode';
+import html2canvas from 'html2canvas'
+import { v4 as uuidv4 } from 'uuid'
+import { Canvas, FabricImage, IText, Rect, Circle, Triangle, ActiveSelection, StaticCanvas, Shadow, Point, Line } from 'fabric'
 import { useRouter, useParams, usePathname } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient'
 import { campaignService } from '@/lib/campaignService.client'
