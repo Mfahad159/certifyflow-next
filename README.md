@@ -189,53 +189,6 @@ Based on certificate volume (250 to 50,000/year):
 
 ---
 
-## 🗄️ Database Schema
-
-### **Tables**
-
-#### **certificates**
-```sql
-CREATE TABLE certificates (
-  certificate_uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  campaign_id UUID NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL REFERENCES auth.users(id),
-  recipient_data JSONB NOT NULL, -- {name, email, custom_fields}
-  status TEXT DEFAULT 'generated' CHECK (status IN ('generated', 'sent', 'viewed')),
-  created_at TIMESTAMPTZ DEFAULT now(),
-  viewed_at TIMESTAMPTZ,
-  UNIQUE(certificate_uuid)
-);
-
--- RLS Policies
-ALTER TABLE certificates ENABLE ROW LEVEL SECURITY;
-
--- Users can only see their own certificates
-CREATE POLICY "Users can view own certificates"
-  ON certificates FOR SELECT
-  USING (auth.uid() = user_id);
-
--- Public can verify certificates by UUID
-CREATE POLICY "Public can verify certificates"
-  ON certificates FOR SELECT
-  USING (certificate_uuid IS NOT NULL);
-```
-
-#### **campaigns**
-```sql
-CREATE TABLE campaigns (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES auth.users(id),
-  name TEXT NOT NULL,
-  template_data JSONB, -- Canvas template config
-  qr_code_settings JSONB, -- {enabled, size, position}
-  status TEXT DEFAULT 'draft',
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now()
-);
-```
-
----
-
 ## 🚀 Getting Started
 
 ### **Prerequisites**
@@ -247,7 +200,7 @@ CREATE TABLE campaigns (
 
 1. **Clone the repository:**
 ```bash
-git clone https://github.com/theajmalrazaq/certifyflow-next.git
+git clone https://github.com/Mfahad159/certifyflow-next.git
 cd certifyflow-next
 ```
 
@@ -314,34 +267,6 @@ certifyflow-next/
 └── package.json
 ```
 
----
-
-## 🎨 Design System
-
-### **Colors**
-- **Accent:** #A098FF (Orange)
-- **Background:** Dynamic (light/dark mode)
-- **Foreground:** Dynamic text color
-- **Border:** Subtle borders with opacity
-- **Muted:** Secondary text color
-
-### **Typography**
-- **Headings:** Serif font (system-ui serif)
-- **Body:** Sans-serif (system-ui)
-- **Sizes:**
-  - Hero: `text-4xl md:text-5xl`
-  - Subheading: `text-xl md:text-2xl`
-  - Body: `text-sm md:text-base`
-  - Small: `text-xs`
-
-### **Components**
-- **Cards:** `rounded-[32px]` with borders
-- **Buttons:** `rounded-full` with accent color
-- **Inputs:** `rounded-lg` with focus rings
-- **Modals:** Backdrop blur with glassmorphism
-
----
-
 ## 🔒 Security Features
 
 1. **Row Level Security (RLS):** Database-level access control
@@ -351,50 +276,6 @@ certifyflow-next/
 5. **Environment Variables:** Secrets in env files
 6. **CORS Protection:** API route restrictions
 7. **XSS Prevention:** Input sanitization
-
----
-
-## 🌐 API Routes
-
-### **POST /api/send-email**
-Send certificate email via user's provider
-
-**Request:**
-```json
-{
-  "to": "recipient@example.com",
-  "subject": "Your Certificate",
-  "html": "<html>...</html>",
-  "provider": "resend",
-  "apiKey": "re_xxx"
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "messageId": "xxx"
-}
-```
-
----
-
-## 🚢 Deployment
-
-### **Vercel (Recommended)**
-```bash
-# Install Vercel CLI
-pnpm install -g vercel
-
-# Deploy
-vercel --prod
-```
-
-### **Environment Variables (Production)**
-Set in Vercel dashboard:
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
 ---
 
@@ -416,13 +297,12 @@ This project is proprietary software. All rights reserved.
 
 ## 👨‍💻 Author
 
-**Ajmal Razaq**
-- GitHub: [@theajmalrazaq](https://github.com/theajmalrazaq)
-- Repository: [certifyflow-next](https://github.com/theajmalrazaq/certifyflow-next)
+**Ajmal Razaq & Muhammad Fahad**
+- Repository: [certifyflow-next](https://github.com/Mfahad159/certifyflow-next)
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **Next.js** - React framework
 - **Supabase** - Backend infrastructure
@@ -430,36 +310,6 @@ This project is proprietary software. All rights reserved.
 - **shadcn/ui** - UI components
 - **Lucide** - Icon library
 - **Tailwind CSS** - Styling framework
-
----
-
-## 📞 Support
-
-- **Email:** support@certifyflow.com
-- **Documentation:** [docs.certifyflow.com](https://docs.certifyflow.com)
-- **Issues:** [GitHub Issues](https://github.com/theajmalrazaq/certifyflow-next/issues)
-
----
-
-## 🗺️ Roadmap
-
-### **Q1 2026**
-- [ ] Email provider integration UI
-- [ ] Bulk CSV upload improvements
-- [ ] Template marketplace
-- [ ] Mobile app (React Native)
-
-### **Q2 2026**
-- [ ] Advanced analytics dashboard
-- [ ] Custom domain verification
-- [ ] Webhooks API
-- [ ] Multi-language support
-
-### **Q3 2026**
-- [ ] Blockchain certificate anchoring
-- [ ] NFT certificate minting
-- [ ] Advanced reporting
-- [ ] Team collaboration features
 
 ---
 
@@ -495,4 +345,4 @@ This project is proprietary software. All rights reserved.
 
 ---
 
-**Built with ❤️ by Ajmal Razaq | Zero Investment, Maximum Impact** 🚀
+**Built with ❤️ by Ajmal & Fahad| Zero Investment, Maximum Impact** 
