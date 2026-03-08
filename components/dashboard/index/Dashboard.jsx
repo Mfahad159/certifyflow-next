@@ -163,30 +163,10 @@ export default function Dashboard({ initialUser, initialCampaigns, initialStats 
   }
 
   const statsData = [
-    {
-      title: 'Total Campaigns',
-      value: stats?.total_campaigns || 0,
-      icon: LayoutDashboard,
-      color: 'text-blue-500'
-    },
-    {
-      title: 'Certificates Generated',
-      value: stats?.total_certificates_generated || 0,
-      icon: FileText,
-      color: 'text-purple-500'
-    },
-    {
-      title: 'Emails Sent',
-      value: stats?.total_emails_sent || 0,
-      icon: Send,
-      color: 'text-green-500'
-    },
-    {
-      title: 'Success Rate',
-      value: `${stats?.success_rate || 0}%`,
-      icon: CheckCircle2,
-      color: 'text-amber-500'
-    }
+    { label: 'Total Campaigns', value: stats?.total_campaigns || 0, icon: LayoutDashboard, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { label: 'Certificates Generated', value: stats?.total_certificates_generated || 0, icon: FileText, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+    { label: 'Emails Sent', value: stats?.total_emails_sent || 0, icon: Send, color: 'text-orange-500', bg: 'bg-orange-500/10' },
+    { label: 'Success Rate', value: `${stats?.success_rate || 0}%`, icon: CheckCircle2, color: 'text-green-500', bg: 'bg-green-500/10' },
   ]
 
   return (
@@ -263,14 +243,14 @@ export default function Dashboard({ initialUser, initialCampaigns, initialStats 
             {statsData.map((stat, index) => {
               const Icon = stat.icon
               return (
-                <div key={index} className="p-8 rounded-[32px] bg-secondary/10 dark:bg-zinc-900/40 backdrop-blur-md border border-border hover:border-accent/40 transition-all group">
+                <div key={index} className={`p-8 rounded-[32px] ${stat.bg} backdrop-blur-md border border-white/5 hover:border-white/10 transition-all group`}>
                   <div className="flex items-start justify-between mb-6">
                     <div className={`p-3 rounded-xl bg-background border border-border ${stat.color}`}>
                       <Icon size={20} />
                     </div>
                   </div>
                   <div>
-                    <p className="text-[12px] font-bold text-muted-foreground mb-1">{stat.title}</p>
+                    <p className={`text-[12px] font-bold mb-1 ${stat.color}`}>{stat.label}</p>
                     <h3 className="text-3xl font-serif font-bold text-foreground">{stat.value}</h3>
                   </div>
                 </div>
