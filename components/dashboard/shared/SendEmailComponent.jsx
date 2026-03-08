@@ -230,7 +230,7 @@ export default function SendEmailComponent() {
             <div
               className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full filter blur-3xl opacity-20 pointer-events-none bg-gradient-to-r from-[#2A43F8] to-[#4482ff]"
             />
-            <h1 className="text-4xl md:text-6xl font-serif font-bold text-center mb-4 text-foreground dark:text-white">
+            <h1 className="text-4xl md:text-6xl font-serif font-bold text-center mb-4 text-foreground dark:text-white leading-[1.05]">
               Send <span className="text-accent italic">Announcements</span>
             </h1>
             <p className="text-muted-foreground text-center max-w-xl text-lg font-medium">

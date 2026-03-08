@@ -141,7 +141,7 @@ export default function DashboardSidebar({
                     <item.icon size={18} className="transition-colors duration-500" />
                   </div>
                   <span
-                    className={`whitespace-nowrap transition-all duration-500 ${isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 absolute left-10 ml-3'
+                    className={`whitespace-nowrap transition-all duration-300 ${isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 absolute left-10 ml-3'
                       }`}
                   >
                     {item.label}
@@ -169,7 +169,7 @@ export default function DashboardSidebar({
                     <item.icon size={18} className="transition-colors duration-500" />
                   </div>
                   <span
-                    className={`whitespace-nowrap transition-all duration-500 ${isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 absolute left-10 ml-3'
+                    className={`whitespace-nowrap transition-all duration-300 ${isExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 absolute left-10 ml-3'
                       }`}
                   >
                     {item.label}

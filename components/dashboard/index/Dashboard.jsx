@@ -161,28 +161,28 @@ export default function Dashboard({ initialUser, initialCampaigns, initialStats 
 
   const statsData = [
     {
-      title: 'Total Campaigns',
-      value: stats?.total_campaigns || 0,
-      icon: LayoutDashboard,
-      color: 'text-blue-500'
-    },
-    {
-      title: 'Certificates Generated',
-      value: stats?.total_certificates_generated || 0,
-      icon: FileText,
-      color: 'text-purple-500'
+      title: 'Total Certificates',
+      value: stats?.total_certificates || 0,
+      icon: TrendingUp,
+      color: 'text-accent'
     },
     {
       title: 'Emails Sent',
-      value: stats?.total_emails_sent || 0,
-      icon: Send,
-      color: 'text-orange-500'
+      value: stats?.emails_sent || 0,
+      icon: Zap,
+      color: 'text-blue-500'
     },
     {
-      title: 'Success Rate',
-      value: `${stats?.success_rate?.toFixed(1) || 0}%`,
-      icon: CheckCircle2,
+      title: 'Verified Certificates',
+      value: stats?.verified_count || 0,
+      icon: FileCheck,
       color: 'text-green-500'
+    },
+    {
+      title: 'Active Campaigns',
+      value: stats?.active_campaigns || 0,
+      icon: Search,
+      color: 'text-orange-500'
     }
   ]
 
@@ -428,23 +428,23 @@ export default function Dashboard({ initialUser, initialCampaigns, initialStats 
 
         {/* Delete Confirmation Dialog */}
         <AlertDialog open={deleteDialog.open} onOpenChange={(open) => !isDeleting && setDeleteDialog({ open, campaign: null })}>
-          <AlertDialogContent>
+          <AlertDialogContent className="bg-background dark:bg-zinc-950 border border-border dark:border-white/10 rounded-[32px] p-8 max-w-sm mx-auto shadow-none">
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete Campaign?</AlertDialogTitle>
-              <AlertDialogDescription>
+              <AlertDialogTitle className="text-lg font-serif">Delete Campaign?</AlertDialogTitle>
+              <AlertDialogDescription className="text-zinc-500 py-2 text-xs">
                 Are you sure you want to delete "{deleteDialog.campaign?.name}"? This action cannot be undone and will permanently delete all campaign data including certificates.
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel disabled={isDeleting} className="cursor-pointer">
+            <AlertDialogFooter className="flex-col sm:flex-row gap-4 mt-6">
+              <AlertDialogCancel disabled={isDeleting} className="flex-1 rounded-full border-border bg-foreground/5 text-[12px] font-bold py-6 hover:bg-foreground/10 cursor-pointer">
                 Cancel
               </AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDeleteConfirm}
                 disabled={isDeleting}
-                className="bg-red-500 text-white hover:bg-red-600 cursor-pointer"
+                className="flex-1 rounded-full bg-red-500 text-white text-[12px] font-bold py-6 hover:bg-red-600 cursor-pointer"
               >
-                {isDeleting ? 'Deleting...' : 'Yes, Delete Campaign'}
+                {isDeleting ? 'Deleting...' : 'Yes, Delete'}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

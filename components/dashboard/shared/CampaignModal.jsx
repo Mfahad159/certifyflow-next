@@ -240,7 +240,7 @@ export default function CampaignModal({ isOpen, onClose, campaignType, userId })
   return (
     <>
       <Dialog open={isOpen} onOpenChange={handleClose}>
-        <DialogContent className="sm:max-w-lg p-0 overflow-hidden border-border dark:border-white/10 [&>button:last-child]:bg-secondary/50 [&>button:last-child]:border [&>button:last-child]:border-border [&>button:last-child]:rounded-full [&>button:last-child]:w-7 [&>button:last-child]:h-7 [&>button:last-child]:right-6 [&>button:last-child]:top-6 [&>button:last-child]:transition-all [&>button:last-child]:hover:bg-secondary [&>button:last-child]:flex [&>button:last-child]:items-center [&>button:last-child]:justify-center">
+        <DialogContent className="sm:max-w-lg p-0 overflow-hidden border-border dark:border-white/10 backdrop-blur-3xl bg-background/80 [&>button:last-child]:bg-secondary/50 [&>button:last-child]:border [&>button:last-child]:border-border [&>button:last-child]:rounded-full [&>button:last-child]:w-7 [&>button:last-child]:h-7 [&>button:last-child]:right-6 [&>button:last-child]:top-6 [&>button:last-child]:transition-all [&>button:last-child]:hover:bg-secondary [&>button:last-child]:flex [&>button:last-child]:items-center [&>button:last-child]:justify-center">
           <DialogHeader className="px-6 py-6 border-b bg-secondary/20 dark:bg-white/5 text-left">
             <div className="flex items-center justify-between mb-1">
               <DialogTitle className="text-xl font-bold font-serif">Create Campaign</DialogTitle>
