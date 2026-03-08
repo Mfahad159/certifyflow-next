@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase } from './supabaseClient'
 import type { Database } from './database.types'
 
 export type PublicTemplate = Database['public']['Tables']['public_templates']['Row']
