@@ -9,6 +9,20 @@ export type Campaign = {
     status: string
     created_at: string
     updated_at: string
+    type?: string
+    total_certificates?: number
+    certificates_generated?: number
+    emails_sent?: number
+}
+
+export type UserStats = {
+    id?: string
+    user_id: string
+    total_certificates_generated: number
+    total_emails_sent: number
+    total_campaigns: number
+    success_rate: number
+    total_templates_created?: number
 }
 
 export async function getCampaigns(): Promise<Campaign[]> {
@@ -83,4 +97,29 @@ export async function createCampaign(campaignData: Partial<Campaign>): Promise<C
     }
 
     return data as Campaign
+}
+
+export async function getUserStats(userId: string): Promise<UserStats | null> {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+        .from('user_stats')
+        .select('*')
+        .eq('user_id', userId)
+        .single()
+
+    if (error) {
+        if (error.code === 'PGRST116') {
+            return {
+                user_id: userId,
+                total_certificates_generated: 0,
+                total_emails_sent: 0,
+                total_campaigns: 0,
+                success_rate: 0
+            }
+        }
+        console.error('Error fetching user stats:', error.message)
+        return null
+    }
+
+    return data as UserStats
 }

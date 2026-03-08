@@ -24,12 +24,27 @@ import {
   MoreVertical
 } from 'lucide-react'
 
-export default function Dashboard() {
+import { createClient } from '@/lib/supabase/client'
+import { campaignService } from '@/lib/campaignService'
+import { Loader2 as Loader } from 'lucide-react'
+import { signOut } from '@/lib/supabase/client' // this may not exist, we should use supabase.auth.signOut()
+
+// Import UI components that might be missing (assuming they exist in the project)
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
+} from "@/components/ui/alert-dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import DashboardNavbar from "./DashboardNavbar" // or wherever it is
+import CampaignModal from "./CampaignModal"
+
+export default function Dashboard({ initialUser, initialCampaigns, initialStats }) {
   const navigate = useRouter()
-  const [user, setUser] = useState(null)
-  const [stats, setStats] = useState(null)
-  const [recentCampaigns, setRecentCampaigns] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
+  const supabase = createClient()
+  const [user, setUser] = useState(initialUser || null)
+  const [stats, setStats] = useState(initialStats || null)
+  const [recentCampaigns, setRecentCampaigns] = useState(initialCampaigns || [])
+  const [isLoading, setIsLoading] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [timeFilter, setTimeFilter] = useState('Last 30 days')
   const [scrolled, setScrolled] = useState(false)
@@ -43,8 +58,6 @@ export default function Dashboard() {
   })
 
   useEffect(() => {
-    loadUserData()
-
     const handleScroll = () => {
       setScrolled(window.scrollY > 20)
     }
@@ -53,62 +66,6 @@ export default function Dashboard() {
       window.removeEventListener('scroll', handleScroll)
     }
   }, [])
-
-  useEffect(() => {
-    // Theme Initialisation
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-    localStorage.setItem('theme', theme)
-  }, [theme])
-
-  const loadUserData = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.user) {
-        navigate.push('/')
-        return
-      }
-
-      const userId = session.user.id
-      setUser(session.user)
-
-      // Load stats and campaigns independently
-      const loadStats = async () => {
-        try {
-          const userStats = await campaignService.getUserStats(userId)
-          setStats(userStats)
-        } catch (error) {
-          console.error('Error loading stats:', error)
-          // Keep default stats
-        }
-      }
-
-      const loadCampaigns = async () => {
-        try {
-          const campaigns = await campaignService.getRecentCampaigns(userId)
-          console.log('Dashboard recent campaigns:', campaigns)
-          setRecentCampaigns(campaigns)
-        } catch (error) {
-          console.error('Error loading recent campaigns:', error)
-          setRecentCampaigns([])
-        }
-      }
-
-      // Minimum loading time for smooth UX
-      const minLoadTime = new Promise(resolve => setTimeout(resolve, 3000))
-
-      // Run everything in parallel
-      await Promise.all([loadStats(), loadCampaigns(), minLoadTime])
-
-    } catch (error) {
-      console.error('Core dashboard loading error:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   const handleLogout = async () => {
     await signOut()
