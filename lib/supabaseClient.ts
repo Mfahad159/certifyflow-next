@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createBrowserClient } from '@supabase/ssr'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -7,14 +7,14 @@ if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error('Missing Supabase environment variables')
 }
 
-// Client-side Supabase client initialization (Safe for Next.js "use client" boundaries)
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Client-side Supabase client initialization using @supabase/ssr
+export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey)
 
 export const signInWithGoogle = async () => {
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-            redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/dashboard` : undefined,
+            redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
             queryParams: {
                 access_type: 'offline',
                 prompt: 'consent',

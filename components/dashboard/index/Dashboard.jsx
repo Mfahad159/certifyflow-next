@@ -21,7 +21,10 @@ import {
   Settings,
   Trash2,
   Edit,
-  MoreVertical
+  MoreVertical,
+  Zap,
+  FileCheck,
+  Search
 } from 'lucide-react'
 
 import { createClient } from '@/lib/supabase/client'

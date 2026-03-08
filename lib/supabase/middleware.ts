@@ -42,9 +42,9 @@ export async function updateSession(request: NextRequest) {
     const isProtectedRoute = protectedPaths.some((path) => request.nextUrl.pathname.startsWith(path))
 
     if (isProtectedRoute && !user) {
-        // Redirect to login if user is not authenticated
+        // Redirect to login (home page) if user is not authenticated
         const url = request.nextUrl.clone()
-        url.pathname = '/login'
+        url.pathname = '/'
         return NextResponse.redirect(url)
     }
 
