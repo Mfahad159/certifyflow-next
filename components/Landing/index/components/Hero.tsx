@@ -1,9 +1,9 @@
 import { useRouter } from 'next/navigation';
 const BACKGROUND_IMG = "https://4kwallpapers.com/images/wallpapers/rays-violet-background-bars-3d-background-glowing-black-3840x2160-2290.jpg";
 import { useState, useEffect, ReactNode } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabaseClient';
 import { ArrowRight } from 'lucide-react';
-import { signInWithGoogle } from '@/lib/supabase';
+import { signInWithGoogle } from '@/lib/supabaseClient';
 
 import { Loader } from '@/components/ui/loader';
 

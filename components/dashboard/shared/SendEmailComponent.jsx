@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import { render } from "@react-email/render";
 import AnnouncementEmail from "../../../emails/AnnouncementEmail";
-import { supabase, signOut } from "@/lib/supabase";
+import { supabase, signOut } from "@/lib/supabaseClient";
 import DashboardNavbar from "./DashboardNavbar";
 import { campaignService } from "@/lib/campaignService";
 

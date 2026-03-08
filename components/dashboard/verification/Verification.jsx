@@ -1,7 +1,7 @@
 "use client";
 import { useRouter, useParams } from 'next/navigation';
 
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabaseClient'
 import { Card, CardHeader, CardTitle, CardContent } from '../../ui/card'
 import {
   Dialog,

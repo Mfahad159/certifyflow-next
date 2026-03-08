@@ -1,6 +1,6 @@
 import { useRouter } from 'next/navigation';
 
-import { supabase, signOut } from '@/lib/supabase'
+import { supabase, signOut } from '@/lib/supabaseClient'
 import { campaignService } from '@/lib/campaignService'
 import DashboardNavbar from '../shared/DashboardNavbar'
 import { Loader } from '../../ui/loader'

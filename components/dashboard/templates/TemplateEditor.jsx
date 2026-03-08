@@ -1,7 +1,7 @@
 import { useRouter, useParams } from 'next/navigation';
 
 import { ArrowLeft, Code, Eye, Save, FileText, User, LogOut } from 'lucide-react'
-import { supabase, signOut } from '@/lib/supabase'
+import { supabase, signOut } from '@/lib/supabaseClient'
 import { templateService } from '@/lib/templateService'
 import { Button } from '../../ui/button'
 import { Input } from '../../ui/input'

@@ -1,7 +1,7 @@
 import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { LogOut, User, ChevronDown, Settings } from 'lucide-react';
-import { supabase, signInWithGoogle, signOut } from '@/lib/supabase';
+import { supabase, signInWithGoogle, signOut } from '@/lib/supabaseClient';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
 export default function Navbar() {

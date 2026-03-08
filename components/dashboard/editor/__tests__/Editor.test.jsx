@@ -5,7 +5,7 @@ import Editor from '../Editor';
 import React, { act } from 'react';
 
 import { campaignService } from '@/lib/campaignService';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabaseClient';
 
 // -- MOCKS --
 
@@ -77,7 +77,7 @@ vi.mock('@/lib/campaignService', () => ({
   }
 }));
 
-vi.mock('@/lib/supabase', () => ({
+vi.mock('@/lib/supabaseClient', () => ({
   supabase: {
     auth: {
       getUser: vi.fn().mockResolvedValue({ 

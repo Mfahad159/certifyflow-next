@@ -2,7 +2,7 @@ import { useRouter } from 'next/navigation';
 
 import DashboardNavbar from '../shared/DashboardNavbar'
 import { templateService } from '@/lib/templateService'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabaseClient'
 import { Loader } from '../../ui/loader'
 import TemplateThumbnail, { getTemplatePreviewHtml } from '../shared/TemplateThumbnail'
 import { 
