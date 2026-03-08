@@ -9,6 +9,8 @@ import { Canvas, FabricImage, IText, Rect, Circle, Triangle, ActiveSelection, St
 import { useRouter, useParams, usePathname } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient'
 import { campaignService } from '@/lib/campaignService.client'
+import { templateService } from '@/lib/templateService'
+import { storageService } from '@/lib/storageService'
 import { Loader } from '../../ui/loader'
 
 import { toast } from 'sonner'

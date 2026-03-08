@@ -13,7 +13,7 @@ export const templateService = {
       .order('usage_count', { ascending: false })
 
     if (error) throw error
-    return data as PublicTemplate[]
+    return (data || []) as PublicTemplate[]
   },
 
   // Get all private templates for a user
@@ -25,7 +25,7 @@ export const templateService = {
       .order('updated_at', { ascending: false })
 
     if (error) throw error
-    return data as PrivateTemplate[]
+    return (data || []) as PrivateTemplate[]
   },
 
   // Get a single private template
