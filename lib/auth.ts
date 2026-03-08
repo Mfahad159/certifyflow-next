@@ -1,10 +1,7 @@
-import { createClient as createBrowserClient } from '@/lib/supabase/client'
-import { createClient as createServerClient } from '@/lib/supabase/server'
+"use client"
 
-/**
- * Initiates Google OAuth login flow.
- * Note: Must be called from a Client Component or browser context.
- */
+import { createClient as createBrowserClient } from '@/lib/supabase/client'
+
 export async function loginWithGoogle() {
     const supabase = createBrowserClient()
 
@@ -38,17 +35,3 @@ export async function logout() {
     }
 }
 
-/**
- * Retrieves the currently authenticated user context (Server-side).
- * Ideal for Server Components and Route Handlers.
- */
-export async function getCurrentUser() {
-    const supabase = await createServerClient()
-    const { data, error } = await supabase.auth.getUser()
-
-    if (error || !data?.user) {
-        return null
-    }
-
-    return data.user
-}

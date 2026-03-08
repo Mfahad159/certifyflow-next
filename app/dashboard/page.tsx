@@ -1,6 +1,6 @@
 import Dashboard from "@/components/dashboard/index/Dashboard"
 import { Metadata } from "next";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth.server";
 import { getRecentCampaigns, getUserStats } from "@/lib/services/campaignService";
 
 export const metadata: Metadata = {
