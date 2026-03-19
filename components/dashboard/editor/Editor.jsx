@@ -34,10 +34,9 @@ export default function Editor({ campaignType: initialCampaignType = 'generate_o
   const pathname = usePathname()
   const { campaignId, templateId } = useParams()
 
-  // Determine editor mode based on URL or parameters
   const isTemplateMode = pathname.includes('/templates/')
   const [campaignType, setCampaignType] = useState(initialCampaignType)
-  const isEmailSendEnabled = !isTemplateMode && campaignType === 'generate_send'
+  const isEmailSendEnabled = !isTemplateMode
 
   const canvasRef = useRef(null)
   const fabricRef = useRef(null) // Fabric Canvas instance
@@ -1943,6 +1942,8 @@ export default function Editor({ campaignType: initialCampaignType = 'generate_o
               brandName: config?.brandName || fromName || 'BulkCerts',
               logoUrl: config?.logoUrl || 'https://i.ibb.co/3yhthnMj/Frame-1-6.png',
               accentColor: config?.accentColor || '#6b55fd',
+              provider: emailProvider,
+              apiKey: apiKey,
               html: `
                 <div style="font-family: sans-serif; text-align: center; padding: 40px; background-color: #fafafa;">
                   <img src="${config?.logoUrl || 'https://i.ibb.co/3yhthnMj/Frame-1-6.png'}" style="height: 48px; margin-bottom: 24px;" />
@@ -1963,9 +1964,16 @@ export default function Editor({ campaignType: initialCampaignType = 'generate_o
             })
           })
 
+          let isSuccess = false;
           if (response.ok) {
+            isSuccess = true;
             successCount++;
             setEmailsSent(successCount);
+          } else {
+            const errorData = await response.json().catch(() => ({}));
+            const errorMessage = errorData.error || response.statusText || 'Failed to send';
+            console.error(`API Error for ${recipientEmail}:`, errorMessage);
+            toast.error(`Failed to send to ${recipientEmail}: ${errorMessage}`);
           }
 
           // Save certificate to database
@@ -1978,7 +1986,7 @@ export default function Editor({ campaignType: initialCampaignType = 'generate_o
               recipient_name: recipientName,
               recipient_email: recipientEmail,
               verification_url: verificationUrl,
-              status: 'sent'
+              status: isSuccess ? 'sent' : 'generated'
             })
 
             // Update campaign progress
@@ -1997,9 +2005,15 @@ export default function Editor({ campaignType: initialCampaignType = 'generate_o
 
       setBatchIsCompleted(true)
       if (campaignId) {
-        await campaignService.updateCampaign(campaignId, { status: 'completed' })
+        const finalStatus = successCount === 0 ? 'failed' : (successCount === total ? 'completed' : 'processing')
+        await campaignService.updateCampaign(campaignId, { status: finalStatus })
       }
-      toast.success(`Successfully sent ${successCount} certificates!`)
+      
+      if (successCount === total) {
+        toast.success(`Successfully sent all ${total} certificates!`)
+      } else {
+        toast.warning(`Sent ${successCount} out of ${total} certificates. Check errors.`)
+      }
     } catch (err) {
       console.error('Error sending certificates:', err)
       toast.error('Error sending certificates.')

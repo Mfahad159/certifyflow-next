@@ -16,7 +16,7 @@ export async function POST(request: Request) {
         }
 
         if (!provider || !apiKey) {
-            return NextResponse.json({ error: 'Missing email provider or API key' }, { status: 400 });
+            return NextResponse.json({ error: 'Email provider not configured. Please set up your credentials in Settings > Email Settings.' }, { status: 400 });
         }
 
         const from = fromName ? `${fromName} <${fromEmail}>` : fromEmail;
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
             case 'mailgun':
             case 'aws ses':
                 // Handle generic SMTP providers (including SendGrid/Mailgun SMTP relays)
-                result = await sendWithNodemailer({ to, from, subject, html: emailHtml, image, apiKey, provider });
+                result = await sendWithNodemailer({ to, from, fromEmail, subject, html: emailHtml, image, apiKey, provider });
                 break;
             default:
                 return NextResponse.json({ error: `Unsupported provider: ${provider}` }, { status: 400 });
@@ -99,13 +99,22 @@ async function sendWithResend({ to, from, subject, html, image, apiKey }: any) {
 }
 
 // Nodemailer implementation (Gmail, SendGrid, Mailgun, AWS SES, generic SMTP)
-async function sendWithNodemailer({ to, from, subject, html, image, apiKey, provider }: any) {
+async function sendWithNodemailer({ to, from, fromEmail, subject, html, image, apiKey, provider }: any) {
     let transporter;
 
     if (provider.toLowerCase() === 'gmail') {
-        const [email, appPassword] = apiKey.split(':');
+        let email, appPassword;
+        if (apiKey.includes(':')) {
+            [email, appPassword] = apiKey.split(':');
+        } else {
+            email = fromEmail || (from.includes('<') ? from.match(/<([^>]+)>/)?.[1] : from);
+            appPassword = apiKey;
+        }
+
+        appPassword = appPassword?.replace(/\s+/g, ''); // Fix for Google's spaced formatting
+        
         if (!email || !appPassword) {
-            throw new Error('Gmail API key must be in format: email:appPassword');
+            throw new Error('Gmail API key must be in format: email:appPassword (or provide a valid Sender Email)');
         }
         transporter = nodemailer.createTransport({
             service: 'gmail',

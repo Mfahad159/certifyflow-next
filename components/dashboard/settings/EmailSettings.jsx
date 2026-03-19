@@ -1,8 +1,9 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardNavbar from '../shared/DashboardNavbar';
 import { createClient } from '@/lib/supabase/client';
-import { signOut } from '@/lib/auth';
 import {
   Check,
   Eye,
@@ -12,7 +13,8 @@ import {
   Eye as EyeIcon,
   Check as CheckIcon,
   CircleAlert as AlertCircleIcon,
-  Loader2 as Loader
+  Loader2 as Loader,
+  Plus
 } from 'lucide-react';
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -119,7 +121,7 @@ export default function EmailSettings() {
   }
 
   const handleLogout = async () => {
-    await signOut()
+    await supabase.auth.signOut()
     navigate.push('/')
   }
 

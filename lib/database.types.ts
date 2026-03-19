@@ -159,6 +159,50 @@ export interface Database {
           period_start_date?: string
         }
       }
+      email_settings: {
+        Row: {
+          id: string
+          user_id: string
+          provider: string
+          api_key: string | null
+          from_email: string | null
+          from_name: string | null
+          smtp_host: string | null
+          smtp_port: number | null
+          smtp_user: string | null
+          smtp_pass: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          provider: string
+          api_key?: string | null
+          from_email?: string | null
+          from_name?: string | null
+          smtp_host?: string | null
+          smtp_port?: number | null
+          smtp_user?: string | null
+          smtp_pass?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          provider?: string
+          api_key?: string | null
+          from_email?: string | null
+          from_name?: string | null
+          smtp_host?: string | null
+          smtp_port?: number | null
+          smtp_user?: string | null
+          smtp_pass?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
       public_templates: {
         Row: {
           id: string
