@@ -1,33 +1,20 @@
 "use client";
 import React, { useEffect, useState } from 'react'
+import { useTheme } from 'next-themes'
 import { Sun, Moon } from 'lucide-react'
 import { Button } from './button'
 
-function getStoredTheme() {
-  try {
-    return localStorage.getItem('theme')
-  } catch (e) { return null }
-}
-
-function setDOMTheme(theme: string | null) {
-  const el = document.documentElement
-  if (theme === 'dark') el.classList.add('dark')
-  else el.classList.remove('dark')
-}
-
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState(() => getStoredTheme() || (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'))
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
-    setDOMTheme(theme)
-    try { localStorage.setItem('theme', theme) } catch (e) { }
-  }, [theme])
+  useEffect(() => setMounted(true), [])
+
+  if (!mounted) return null
 
   return (
-    <Button variant="ghost" aria-label="Toggle theme" onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}>
+    <Button variant="ghost" aria-label="Toggle theme" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
       {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
     </Button>
   )
 }
-
-export { getStoredTheme, setDOMTheme }

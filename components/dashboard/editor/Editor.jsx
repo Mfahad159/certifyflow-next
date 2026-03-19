@@ -11,6 +11,7 @@ import { supabase } from '@/lib/supabaseClient'
 import { campaignService } from '@/lib/campaignService.client'
 import { templateService } from '@/lib/templateService'
 import { storageService } from '@/lib/storageService'
+import { templates as CANVAS_PRESETS } from '@/lib/templates'
 import { Loader } from '../../ui/loader'
 
 import { toast } from 'sonner'
@@ -1161,7 +1162,11 @@ export default function Editor({ campaignType: initialCampaignType = 'generate_o
             } else {
               const rowIdx = (previewRowIndex >= 0 && previewRowIndex < csvData.length) ? previewRowIndex : 0
               const row = csvData[rowIdx]
-              textVal = (row && field.column) ? formatFieldValue(row[field.column]) : `{${field.column}}`
+              const actualKey = row ? Object.keys(row).find(k => k.toLowerCase() === field.column?.toLowerCase()) : undefined
+              const rawDataValue = actualKey ? row[actualKey] : undefined
+              textVal = (row && rawDataValue !== undefined && rawDataValue !== '') 
+                ? formatFieldValue(rawDataValue) 
+                : `{${field.column}}`
             }
 
             const textObj = new IText(textVal || 'Text', {
@@ -1226,7 +1231,14 @@ export default function Editor({ campaignType: initialCampaignType = 'generate_o
             } else {
               const rowIdx = (previewRowIndex >= 0 && previewRowIndex < csvData.length) ? previewRowIndex : 0
               const row = csvData[rowIdx]
-              textVal = (row && field.column) ? formatFieldValue(row[field.column]) : `{${field.column}}`
+              const actualKey = row ? Object.keys(row).find(k => k.toLowerCase() === field.column?.toLowerCase()) : undefined
+              const rawDataValue = actualKey ? row[actualKey] : undefined
+              textVal = (row && rawDataValue !== undefined && rawDataValue !== '') 
+                ? formatFieldValue(rawDataValue) 
+                : `{${field.column}}`
+              
+              console.log('[Canvas] Rendering field:', field.column || field.id, '→ textVal:', textVal, '| row value:', rawDataValue)
+              console.log('[Canvas] Current data row:', row)
             }
 
             if (obj.text !== textVal) { obj.set('text', textVal); needsRender = true }
@@ -1265,7 +1277,7 @@ export default function Editor({ campaignType: initialCampaignType = 'generate_o
     return () => {
       if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current)
     }
-  }, [textFields, canvasReady, isLoading, csvData.length, previewRowIndex, csvColumns.length, certificates.length])
+  }, [textFields, canvasReady, isLoading, csvData, previewRowIndex, csvColumns, certificates])
 
   // Sync Selection: React State -> Fabric
   useEffect(() => {
@@ -1335,6 +1347,7 @@ export default function Editor({ campaignType: initialCampaignType = 'generate_o
       const names = data.map(row => row[headers[0]] || '')
       setNames(names)
       setPreviewName(names[0])
+      console.log('[Editor] CSV data parsed and set:', data.length, data[0])
     }
     r.readAsText(f)
   }, [uploadedImage, textFields])
@@ -1441,8 +1454,10 @@ export default function Editor({ campaignType: initialCampaignType = 'generate_o
             let text = ""
             if (field.type === "uuid") text = certificateUuid.split("-")[0].toUpperCase()
             else if (field.type === "staticText") text = field.text || ""
-            else text = row[field.column] || ""
-
+            else {
+              const actualKey = row ? Object.keys(row).find(k => k.toLowerCase() === field.column?.toLowerCase()) : undefined
+              text = (actualKey ? row[actualKey] : undefined) || ""
+            }
             const originX = field.textAlign === "center" ? "center" : (field.textAlign === "right" ? "right" : "left")
             const obj = new IText(text, {
               left: field.x, top: field.y,
@@ -1888,7 +1903,8 @@ export default function Editor({ campaignType: initialCampaignType = 'generate_o
             } else if (field.type === "staticText") {
               text = field.text || ""
             } else {
-              text = row[field.column] || ""
+              const actualKey = row ? Object.keys(row).find(k => k.toLowerCase() === field.column?.toLowerCase()) : undefined
+              text = (actualKey ? row[actualKey] : undefined) || ""
             }
             const originX = field.textAlign === "center" ? "center" : (field.textAlign === "right" ? "right" : "left")
             const obj = new IText(text, {
@@ -2127,7 +2143,8 @@ export default function Editor({ campaignType: initialCampaignType = 'generate_o
             } else if (field.type === "staticText") {
               text = field.text
             } else {
-              text = row[field.column] || ""
+              const actualKey = row ? Object.keys(row).find(k => k.toLowerCase() === field.column?.toLowerCase()) : undefined
+              text = (actualKey ? row[actualKey] : undefined) || ""
             }
             const originX = field.textAlign === "center" ? "center" : (field.textAlign === "right" ? "right" : "left")
             const obj = new IText(text, {
@@ -2275,7 +2292,8 @@ export default function Editor({ campaignType: initialCampaignType = 'generate_o
             } else if (field.type === "staticText") {
               text = field.text
             } else {
-              text = row[field.column] || ""
+              const actualKey = row ? Object.keys(row).find(k => k.toLowerCase() === field.column?.toLowerCase()) : undefined
+              text = (actualKey ? row[actualKey] : undefined) || ""
             }
             const originX = field.textAlign === "center" ? "center" : (field.textAlign === "right" ? "right" : "left")
             const obj = new IText(text, {
@@ -2712,6 +2730,7 @@ export default function Editor({ campaignType: initialCampaignType = 'generate_o
 
         <SidebarLeft
           leftSidebarOpen={leftSidebarOpen}
+          CANVAS_PRESETS={CANVAS_PRESETS}
           dbTemplates={dbTemplates}
           isFetchingTemplates={isFetchingTemplates}
           setTextFields={setTextFields}

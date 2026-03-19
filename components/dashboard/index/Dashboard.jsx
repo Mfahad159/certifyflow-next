@@ -27,6 +27,7 @@ import {
   Search
 } from 'lucide-react'
 
+import { useTheme } from 'next-themes'
 import { createClient } from '@/lib/supabase/client'
 import { campaignService } from '@/lib/campaignService.client'
 import { Loader } from "@/components/ui/loader"
@@ -53,12 +54,10 @@ export default function Dashboard({ initialUser, initialCampaigns, initialStats 
   const [scrolled, setScrolled] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState({ open: false, campaign: null })
   const [isDeleting, setIsDeleting] = useState(false)
-  const [theme, setTheme] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('theme') || 'light'
-    }
-    return 'light'
-  })
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => setMounted(true), [])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -112,7 +111,7 @@ export default function Dashboard({ initialUser, initialCampaigns, initialStats 
   }
 
   const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light')
+    setTheme(theme === 'light' ? 'dark' : 'light')
   }
 
   const getStatusColor = (status) => {
@@ -193,7 +192,7 @@ export default function Dashboard({ initialUser, initialCampaigns, initialStats 
     <div className="min-h-screen bg-background no-scrollbar">
       <DashboardNavbar
         user={user}
-        theme={theme}
+        theme={mounted ? theme : 'dark'}
         toggleTheme={toggleTheme}
         handleLogout={handleLogout}
         handleNewCampaign={handleNewCampaign}

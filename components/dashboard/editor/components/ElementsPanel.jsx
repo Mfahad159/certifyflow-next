@@ -25,8 +25,8 @@ const ElementsPanel = ({
   setUploadedImage
 }) => {
   const allLibraryTemplates = [
-    ...CANVAS_PRESETS.map(p => ({ ...p, isPreset: true })),
-    ...dbTemplates
+    ...(Array.isArray(CANVAS_PRESETS) ? CANVAS_PRESETS.map(p => ({ ...p, isPreset: true })) : []),
+    ...(Array.isArray(dbTemplates) ? dbTemplates : [])
   ]
 
   const handleApplyTemplate = (template) => {
@@ -34,12 +34,28 @@ const ElementsPanel = ({
       let fields = []
       
       if (template.isPreset) {
-        fields = template.textFields.map(f => ({
+        // Presets from lib/templates.ts use `layers`, not `textFields`
+        const sourceFields = Array.isArray(template.layers) 
+          ? template.layers 
+          : Array.isArray(template.textFields) 
+            ? template.textFields 
+            : []
+        fields = sourceFields.map(f => ({
           ...f,
           id: `preset_${Date.now()}_${Math.random()}`
         }))
-      } else if (template.template_data?.textFields) {
-        fields = template.template_data.textFields.map(f => ({
+
+        if (sourceFields.length === 0) {
+          console.warn('[ElementsPanel] Preset template has no layers/textFields:', template)
+        }
+      } else {
+        // DB templates store data in template_data
+        const dbFields = Array.isArray(template.template_data?.layers)
+          ? template.template_data.layers
+          : Array.isArray(template.template_data?.textFields)
+            ? template.template_data.textFields
+            : []
+        fields = dbFields.map(f => ({
           ...f,
           id: `db_${Date.now()}_${Math.random()}`
         }))
@@ -55,6 +71,8 @@ const ElementsPanel = ({
         }
 
         toast.success(`Applied ${template.name}`)
+      } else {
+        toast.error('Template has no fields to apply')
       }
     }
   }
