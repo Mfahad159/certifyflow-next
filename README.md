@@ -7,7 +7,7 @@
 CertifyFlow is a modern SaaS platform for bulk certificate generation, distribution, and verification. Built with a unique "Bring Your Own Email Service" (BYOES) model, we charge only for certificate generation while users send unlimited emails through their own providers.
 
 **Live Demo:** [certifyflow.com](https://certifyflow.com)  
-**Repository:** [github.com/theajmalrazaq/certifyflow-next](https://github.com/Mfahad159/certifyflow-next)
+**Repository:** [github.com/Mfahad159/certifyflow-next](https://github.com/Mfahad159/certifyflow-next)
 
 ---
 
